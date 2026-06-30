@@ -17,6 +17,8 @@ The admin dashboard now presents public pages directly in the sidebar so admins 
 - Contact
 - Social Links
 
+The dashboard behaves like a single-page admin app: the blue sidebar controls which editor is visible, and only one page or manager panel is shown at a time.
+
 ## Repeatable Content
 
 The Page Items Manager controls repeatable sections:
@@ -28,6 +30,8 @@ The Page Items Manager controls repeatable sections:
 - Testimonials
 - Regions
 - FAQs
+
+The manager includes filters so admins can view one content type at a time.
 
 These records are stored in `content_items` and loaded on public pages through `BACKEND/content_items.php`.
 
@@ -41,4 +45,3 @@ These records are stored in `content_items` and loaded on public pages through `
 ## Public Rendering
 
 The script `js/page-content.js` replaces static fallback content on Team, Impact, and Contact pages when database content is available.
-

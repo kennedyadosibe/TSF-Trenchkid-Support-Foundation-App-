@@ -5,6 +5,8 @@ require_once __DIR__ . '/../BACKEND/content_definitions.php';
 requireAdminAuth();
 
 $pdo = getDB();
+$contentDefinitions = getContentDefinitions();
+$activePanel = 'overview';
 $publishMessage = '';
 $publishError = '';
 $settingsMessage = '';
@@ -53,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publi
             );
             $stmt->execute([$title, $slug, $content, $category, $author ?: 'TSF Admin', $_SESSION['admin_id'], $featured]);
             $publishMessage = 'Article published successfully.';
+            $activePanel = 'publish';
         }
     }
 }
@@ -71,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
             $stmt->execute([$key, trim($_POST[$key] ?? '')]);
         }
         $settingsMessage = 'Site content updated successfully.';
+        $activePanel = sectionIdForSettingKey($postedKeys[0] ?? '', $contentDefinitions);
     }
 }
 
@@ -130,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_g
             $stmt = $pdo->prepare('INSERT INTO gallery (title, caption, image_url, category, display_order, is_active) VALUES (?, ?, ?, ?, ?, 1)');
             $stmt->execute([$title, $caption, $imageUrl, $category ?: 'General', $order]);
             $galleryMessage = 'Gallery item added.';
+            $activePanel = 'gallery';
         }
     }
 }
@@ -141,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         $stmt = $pdo->prepare('UPDATE gallery SET is_active = 0 WHERE id = ?');
         $stmt->execute([(int)($_POST['gallery_id'] ?? 0)]);
         $galleryMessage = 'Gallery item removed from the public page.';
+        $activePanel = 'gallery';
     }
 }
 
@@ -191,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
             $stmt = $pdo->prepare('INSERT INTO content_items (item_type, title, subtitle, body, meta_value, image_url, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
             $stmt->execute([$itemType, $title, $subtitle, $body, $metaValue, $imageUrl, $order]);
             $contentMessage = $contentTypes[$itemType] . ' added.';
+            $activePanel = 'content-items';
         }
     }
 }
@@ -202,6 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         $stmt = $pdo->prepare('UPDATE content_items SET is_active = 0 WHERE id = ?');
         $stmt->execute([(int)($_POST['content_item_id'] ?? 0)]);
         $contentMessage = 'Content item removed.';
+        $activePanel = 'content-items';
     }
 }
 
@@ -218,6 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             $stmt->execute([$email, $name ?: 'TSF Administrator', $_SESSION['admin_id']]);
             $_SESSION['admin_name'] = $name ?: 'TSF Administrator';
             $accountMessage = 'Admin account updated.';
+            $activePanel = 'account';
         }
     }
 }
@@ -230,7 +239,6 @@ $csrfContentItem = generateCsrfToken('content_item');
 $csrfContentItemDelete = generateCsrfToken('content_item_delete');
 $csrfAccount = generateCsrfToken('account');
 $settingsRows = $pdo->query('SELECT setting_key, setting_value FROM site_settings')->fetchAll();
-$contentDefinitions = getContentDefinitions();
 $settings = getDefaultContentSettings();
 foreach ($settingsRows as $row) {
     $settings[$row['setting_key']] = $row['setting_value'];
@@ -307,6 +315,15 @@ function pageDescription(string $groupName): string {
         'Social Links' => 'Edit the public social media links used on the site.',
     ][$groupName] ?? 'Edit this page content.';
 }
+
+function sectionIdForSettingKey(string $key, array $definitions): string {
+    foreach ($definitions as $groupName => $fields) {
+        if (isset($fields[$key])) {
+            return sectionIdFromGroup($groupName);
+        }
+    }
+    return 'page-home';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -318,7 +335,7 @@ function pageDescription(string $groupName): string {
   <link rel="stylesheet" href="../css/style.css">
   <style>
     html { scroll-behavior: smooth; scroll-padding-top: 90px; }
-    body { background: #eef2f8; min-height: 100vh; }
+    body { background: #eef2f8; min-height: 100vh; overflow-x: hidden; }
     .admin-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: linear-gradient(135deg, #071844, var(--blue-dark) 52%, var(--blue)); padding: 0 1.5rem; height: 68px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 12px 35px rgba(5,16,45,0.22); }
     .admin-header-brand { display: flex; align-items: center; gap: 0.8rem; }
     .admin-header-brand img { height: 42px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22)); }
@@ -330,15 +347,16 @@ function pageDescription(string $groupName): string {
     .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: var(--white); padding: 0.45rem 0.95rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: var(--transition); }
     .logout-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
     .admin-layout { display: flex; padding-top: 68px; min-height: 100vh; }
-    .admin-sidebar { width: 260px; background: #ffffff; border-right: 1px solid rgba(26,63,163,0.08); box-shadow: 10px 0 30px rgba(12,30,72,0.06); position: fixed; top: 68px; left: 0; bottom: 0; overflow-y: auto; padding: 1.25rem 0.9rem; }
+    .admin-sidebar { width: 270px; background: linear-gradient(180deg, #071844 0%, var(--blue-dark) 55%, var(--blue) 100%); box-shadow: 10px 0 30px rgba(12,30,72,0.16); position: fixed; top: 68px; left: 0; bottom: 0; overflow-y: auto; padding: 1.25rem 0.9rem; }
     .sidebar-nav { list-style: none; }
     .sidebar-nav li { margin: 0.16rem 0; }
-    .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.72rem 0.9rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: #5d6a84; text-decoration: none; transition: var(--transition); border: 1px solid transparent; }
-    .sidebar-nav a span { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: #f0f3fa; color: var(--blue); font-size: 0.8rem; font-weight: 900; flex-shrink: 0; }
-    .sidebar-nav a:hover, .sidebar-nav a.active { background: #eef4ff; color: var(--blue-dark); border-color: rgba(26,63,163,0.11); transform: translateX(2px); }
-    .sidebar-nav a.active span { background: var(--blue); color: var(--white); }
-    .sidebar-section-label { font-size: 0.67rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.8px; color: #97a2b6; padding: 0.95rem 0.75rem 0.35rem; }
-    .admin-main { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1480px; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.74rem 0.9rem; border-radius: 12px; font-size: 0.9rem; font-weight: 800; color: rgba(255,255,255,0.78); text-decoration: none; transition: var(--transition); border: 1px solid transparent; }
+    .sidebar-nav a span { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.8rem; font-weight: 900; flex-shrink: 0; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.14); color: var(--white); border-color: rgba(255,255,255,0.16); transform: translateX(2px); }
+    .sidebar-nav a.active { box-shadow: inset 3px 0 0 var(--gold); }
+    .sidebar-nav a.active span { background: var(--gold); color: var(--blue-dark); }
+    .sidebar-section-label { font-size: 0.67rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.8px; color: rgba(255,255,255,0.42); padding: 0.95rem 0.75rem 0.35rem; }
+    .admin-main { margin-left: 270px; flex: 1; padding: 2rem; max-width: 1480px; }
     .dashboard-hero { background: linear-gradient(135deg, #ffffff, #f7f9ff); border: 1px solid rgba(26,63,163,0.08); border-radius: 18px; box-shadow: 0 12px 36px rgba(12,30,72,0.08); padding: 1.45rem 1.6rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
     .dashboard-hero h2 { font-family:'Playfair Display',serif; font-size:1.65rem; color:var(--blue-dark); margin-bottom:0.25rem; }
     .dashboard-hero p { color:var(--gray); font-size:0.92rem; }
@@ -352,7 +370,9 @@ function pageDescription(string $groupName): string {
     .dash-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; background: rgba(26,63,163,0.1); color: var(--blue); font-weight: 900; }
     .dash-stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: var(--blue-dark); line-height: 1; }
     .dash-stat-label { font-size: 0.8rem; color: var(--gray); margin-top: 0.3rem; }
-    .admin-main .admin-section { padding: 0; margin-bottom: 2rem; }
+    .admin-main .admin-section { display: none; padding: 0; margin-bottom: 2rem; animation: panelIn 0.22s ease; }
+    .admin-main .admin-section.active-panel { display: block; }
+    @keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .admin-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; }
     .admin-section-header h3 { font-family: 'Playfair Display', serif; font-size: 1.28rem; color: var(--blue-dark); }
     .admin-section-header p { color: var(--gray); font-size: 0.86rem; margin-top: 0.2rem; }
@@ -375,6 +395,7 @@ function pageDescription(string $groupName): string {
     .settings-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; }
     .mini-btn { border: 1px solid rgba(26,63,163,0.14); background: #f7f9fe; color: var(--blue-dark); border-radius: 999px; padding: 0.48rem 0.78rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: var(--transition); }
     .mini-btn:hover { background: #eef4ff; }
+    .mini-btn.active { background: var(--blue); border-color: var(--blue); color: var(--white); }
     .content-group { border: 1px solid #e4e9f4; border-radius: 14px; margin-bottom: 0.8rem; background: #fbfcff; overflow: hidden; }
     .content-group[hidden] { display: none; }
     .content-group summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--blue-dark); font-weight: 900; font-family: 'Playfair Display', serif; background: linear-gradient(135deg, #ffffff, #f8faff); }
@@ -387,10 +408,10 @@ function pageDescription(string $groupName): string {
     .thumb { width: 84px; height: 58px; object-fit: cover; border-radius: 10px; background: var(--gray-light); box-shadow: 0 5px 14px rgba(12,30,72,0.11); }
     .admin-time { font-size: 0.8rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); padding: 0.3rem 0.8rem; border-radius: 15px; }
     @media(max-width:1180px) { .dashboard-stats { grid-template-columns: repeat(2,1fr); } .dashboard-hero { align-items: flex-start; flex-direction: column; } .dashboard-actions { justify-content: flex-start; } }
-    @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; border-right: 0; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
+    @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
   </style>
 </head>
-<body>
+<body data-active-panel="<?= e($activePanel) ?>">
   <div class="admin-header">
     <div class="admin-header-brand">
       <img src="../images/tsf-logo.png" alt="TSF">
@@ -521,6 +542,12 @@ function pageDescription(string $groupName): string {
         <div class="publish-card" style="margin-bottom:1.2rem">
           <?php if ($contentMessage): ?><div class="alert alert-success show"><?= e($contentMessage) ?></div><?php endif; ?>
           <?php if ($contentError): ?><div class="alert alert-error show"><?= e($contentError) ?></div><?php endif; ?>
+          <div class="settings-actions" style="margin-bottom:1rem">
+            <button type="button" class="mini-btn content-filter active" data-type="all">All</button>
+            <?php foreach ($contentTypes as $value => $label): ?>
+              <button type="button" class="mini-btn content-filter" data-type="<?= e($value) ?>"><?= e($label) ?></button>
+            <?php endforeach; ?>
+          </div>
           <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add_content_item">
             <input type="hidden" name="csrf_token" value="<?= e($csrfContentItem) ?>">
@@ -556,7 +583,7 @@ function pageDescription(string $groupName): string {
               <tbody>
                 <?php if (!$contentItems): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</td></tr><?php endif; ?>
                 <?php foreach ($contentItems as $item): ?>
-                  <tr>
+                  <tr data-content-type="<?= e($item['item_type']) ?>">
                     <td><span class="method-badge"><?= e($contentTypes[$item['item_type']] ?? $item['item_type']) ?></span></td>
                     <td><strong><?= e($item['title']) ?></strong><br><span style="color:var(--gray);font-size:0.8rem"><?= e(substr((string)$item['body'], 0, 90)) ?></span></td>
                     <td><?= e($item['subtitle'] ?: '-') ?></td>
@@ -729,30 +756,29 @@ function pageDescription(string $groupName): string {
     setInterval(updateAdminTime, 1000);
     updateAdminTime();
 
-    const navLinks = Array.from(document.querySelectorAll('.sidebar-nav a[href^="#"]'));
-    const sections = navLinks
-      .map(link => document.querySelector(link.getAttribute('href')))
-      .filter(Boolean);
+    const navLinks = Array.from(document.querySelectorAll('.sidebar-nav a[href^="#"], .dashboard-actions a[href^="#"]'));
+    const sideLinks = Array.from(document.querySelectorAll('.sidebar-nav a[href^="#"]'));
+    const panels = Array.from(document.querySelectorAll('.admin-main .admin-section'));
 
-    function setActiveNav() {
-      let activeId = 'overview';
-      sections.forEach(section => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 130) activeId = section.id;
-      });
-      navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === `#${activeId}`);
-      });
+    function showPanel(panelId, updateHash = true) {
+      const target = document.getElementById(panelId) || document.getElementById('overview');
+      panels.forEach(panel => panel.classList.toggle('active-panel', panel === target));
+      sideLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${target.id}`));
+      if (updateHash) history.replaceState(null, '', `#${target.id}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.forEach(item => item.classList.remove('active'));
-        link.classList.add('active');
+      link.addEventListener('click', e => {
+        const panelId = link.getAttribute('href')?.slice(1);
+        if (!panelId) return;
+        e.preventDefault();
+        showPanel(panelId);
       });
     });
-    window.addEventListener('scroll', setActiveNav, { passive: true });
-    setActiveNav();
+
+    const initialPanel = window.location.hash?.slice(1) || document.body.dataset.activePanel || 'overview';
+    showPanel(initialPanel, false);
 
     const search = document.getElementById('settings-search');
     const groups = Array.from(document.querySelectorAll('.content-group'));
@@ -773,6 +799,19 @@ function pageDescription(string $groupName): string {
     });
     document.getElementById('collapse-settings')?.addEventListener('click', () => {
       groups.forEach(group => { group.open = false; });
+    });
+
+    const contentFilters = Array.from(document.querySelectorAll('.content-filter'));
+    const contentRows = Array.from(document.querySelectorAll('[data-content-type]'));
+    contentFilters.forEach(button => {
+      button.addEventListener('click', () => {
+        const type = button.dataset.type;
+        contentFilters.forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        contentRows.forEach(row => {
+          row.style.display = type === 'all' || row.dataset.contentType === type ? '' : 'none';
+        });
+      });
     });
   </script>
 </body>
