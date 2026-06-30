@@ -90,7 +90,7 @@ function renderFooter() {
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
-        <div class="footer-contact-item"><span class="icon">-</span><span data-setting="contact_address">Kumasi, Ashanti Region, Ghana</span></div>
+        <div class="footer-contact-item"><span class="icon">-</span><span data-setting="contact_address">Bolga, Upper East Region, Ghana</span></div>
         <div class="footer-contact-item"><span class="icon">-</span><span data-setting="contact_phone">+233 XX XXX XXXX</span></div>
         <div class="footer-contact-item"><span class="icon">-</span><span data-setting="contact_email">info@tsfghana.org</span></div>
         <div class="footer-contact-item"><span class="icon">-</span><span>www.tsfghana.org</span></div>

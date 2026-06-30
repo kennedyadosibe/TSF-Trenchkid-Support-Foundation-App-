@@ -13,7 +13,7 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
 ('home_intro_body', 'Trenchkid Support Foundation empowers underprivileged children with education, digital skills, healthcare support, and mentorship so they can build independent and impactful futures.'),
 ('about_brief', 'Trenchkid Support Foundation (TSF) was established by passionate young Ghanaians who believe that no child''s future should be limited by poverty. TSF creates pathways through education, digital skills, mentorship, and community support.'),
 ('mission_statement', 'Trenchkid Support Foundation exists to empower underprivileged children with education, digital skills, and mentorship, enabling them to build independent and impactful futures.'),
-('contact_address', 'Kumasi, Ashanti Region, Ghana'),
+('contact_address', 'Bolga, Upper East Region, Ghana'),
 ('contact_phone', '+233 XX XXX XXXX'),
 ('contact_email', 'info@tsfghana.org'),
 ('office_hours', 'Mon - Fri: 8:00 AM - 5:00 PM'),

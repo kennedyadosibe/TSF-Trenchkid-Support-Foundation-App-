@@ -43,7 +43,7 @@ function getContentDefinitions(): array {
             'impact_testimonials_title' => ['label' => 'Testimonials Title', 'type' => 'text', 'default' => 'Voices of Change'],
             'impact_testimonials_body' => ['label' => 'Testimonials Brief', 'type' => 'textarea', 'default' => 'Hear directly from the children, families, and volunteers whose lives TSF has touched.'],
             'impact_reach_title' => ['label' => 'Reach Title', 'type' => 'text', 'default' => 'Spreading Across Ghana'],
-            'impact_reach_body' => ['label' => 'Reach Text', 'type' => 'textarea', 'default' => 'What started in Kumasi has grown into a nationwide movement. TSF now operates across multiple regions of Ghana, partnering with local communities, schools, and organisations.'],
+            'impact_reach_body' => ['label' => 'Reach Text', 'type' => 'textarea', 'default' => 'What started in Bolga has grown into a nationwide movement. TSF now operates across multiple regions of Ghana, partnering with local communities, schools, and organisations.'],
         ],
         'Team Page' => [
             'team_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Our Team'],
@@ -74,7 +74,7 @@ function getContentDefinitions(): array {
             'contact_form_title' => ['label' => 'Form Title', 'type' => 'text', 'default' => 'Send Us a Message'],
             'contact_form_body' => ['label' => 'Form Brief', 'type' => 'textarea', 'default' => 'Fill out the form and our team will get back to you within 24 hours.'],
             'contact_info_title' => ['label' => 'Info Card Title', 'type' => 'text', 'default' => 'Contact Information'],
-            'contact_address' => ['label' => 'Contact Address', 'type' => 'text', 'default' => 'Kumasi, Ashanti Region, Ghana'],
+            'contact_address' => ['label' => 'Contact Address', 'type' => 'text', 'default' => 'Bolga, Upper East Region, Ghana'],
             'contact_phone' => ['label' => 'Contact Phone', 'type' => 'text', 'default' => '+233 XX XXX XXXX'],
             'contact_email' => ['label' => 'Contact Email', 'type' => 'text', 'default' => 'info@tsfghana.org'],
             'office_hours' => ['label' => 'Office Hours', 'type' => 'text', 'default' => 'Mon - Fri: 8:00 AM - 5:00 PM'],
