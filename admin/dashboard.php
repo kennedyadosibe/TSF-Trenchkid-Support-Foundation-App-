@@ -435,7 +435,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     .method-badge { font-size: 0.75rem; background: #eef2f8; color: #4a5873; padding: 0.24rem 0.62rem; border-radius: 999px; font-weight: 800; white-space: nowrap; }
     .status-ok { color: #276749; font-weight: 800; }
     .status-wait { color: var(--gold-dark); font-weight: 800; }
-    .msg-content { max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gray); }
+    .msg-content { color: var(--gray); white-space: pre-wrap; line-height: 1.65; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 1rem; }
     .settings-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
@@ -454,6 +454,20 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     textarea.form-control { resize: vertical; }
     .settings-help { color: var(--gray); font-size: 0.86rem; margin-bottom: 1.2rem; line-height: 1.6; }
     .thumb { width: 84px; height: 58px; object-fit: cover; border-radius: 10px; background: var(--gray-light); box-shadow: 0 5px 14px rgba(12,30,72,0.11); }
+    .item-editor-list { display: grid; gap: 1rem; }
+    .item-editor-card { background: var(--white); border: 1px solid rgba(26,63,163,0.1); border-radius: 14px; box-shadow: 0 8px 24px rgba(12,30,72,0.06); padding: 1rem; }
+    .item-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+    .item-editor-title { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+    .item-editor-title strong { display: block; color: var(--blue-dark); }
+    .item-editor-title span { color: var(--gray); font-size: 0.84rem; }
+    .item-editor-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+    .item-editor-fields .wide { grid-column: 1 / -1; }
+    .item-editor-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-top: 0.9rem; }
+    .message-list { display: grid; gap: 1rem; }
+    .message-card { background: var(--white); border: 1px solid rgba(26,63,163,0.1); border-radius: 14px; box-shadow: 0 8px 24px rgba(12,30,72,0.06); padding: 1rem; }
+    .message-card-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+    .message-meta { color: var(--gray); font-size: 0.84rem; line-height: 1.6; }
+    .message-body { background: #f8faff; border: 1px solid #e6ecf8; border-radius: 10px; padding: 0.9rem 1rem; color: var(--text); white-space: pre-wrap; line-height: 1.7; }
     .table-input { min-width: 150px; padding: 0.5rem 0.65rem; font-size: 0.82rem; }
     .table-textarea { min-width: 230px; min-height: 76px; padding: 0.55rem 0.65rem; font-size: 0.82rem; }
     .row-actions { display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-start; }
@@ -461,7 +475,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     .delete-row-btn { background: #fff1f1; color: #9b1c1c; border: 1px solid #ffd4d4; border-radius: 999px; padding: 0.42rem 0.75rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .admin-time { font-size: 0.8rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); padding: 0.3rem 0.8rem; border-radius: 15px; }
     @media(max-width:1180px) { .dashboard-stats { grid-template-columns: repeat(2,1fr); } .dashboard-hero { align-items: flex-start; flex-direction: column; } .dashboard-actions { justify-content: flex-start; } }
-    @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
+    @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3, .item-editor-fields { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
   </style>
 </head>
 <body data-active-panel="<?= e($activePanel) ?>">
@@ -633,53 +647,76 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
             <button type="submit" class="btn btn-blue">Add Page Item</button>
           </form>
         </div>
-        <div class="data-table-wrap">
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead><tr><th>Image</th><th>Type</th><th>Title</th><th>Subtitle</th><th>Description</th><th>Meta</th><th>Order</th><th>Action</th></tr></thead>
-              <tbody>
-                <?php if (!$contentItems): ?><tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</td></tr><?php endif; ?>
-                <?php foreach ($contentItems as $item): ?>
-                  <?php $contentFormId = 'content-item-' . (int)$item['id']; ?>
-                  <tr data-content-type="<?= e($item['item_type']) ?>">
-                    <td>
-                      <?php if ($item['image_url']): ?><img class="thumb" src="<?= e($item['image_url']) ?>" alt=""><?php endif; ?>
-                      <input form="<?= e($contentFormId) ?>" class="form-control table-input" type="file" name="content_image" accept="image/jpeg,image/png,image/webp,image/gif">
-                      <input form="<?= e($contentFormId) ?>" class="form-control table-input" name="image_url" value="<?= e($item['image_url'] ?? '') ?>" placeholder="images/... or URL">
-                    </td>
-                    <td>
-                      <select form="<?= e($contentFormId) ?>" class="form-control table-input" name="item_type">
-                        <?php foreach ($contentTypes as $value => $label): ?>
-                          <option value="<?= e($value) ?>" <?= $item['item_type'] === $value ? 'selected' : '' ?>><?= e($label) ?></option>
-                        <?php endforeach; ?>
-                      </select>
-                    </td>
-                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="title" value="<?= e($item['title']) ?>"></td>
-                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="subtitle" value="<?= e($item['subtitle'] ?? '') ?>"></td>
-                    <td><textarea form="<?= e($contentFormId) ?>" class="form-control table-textarea" name="body"><?= e($item['body'] ?? '') ?></textarea></td>
-                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="meta_value" value="<?= e($item['meta_value'] ?? '') ?>"></td>
-                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" style="min-width:80px" type="number" name="display_order" value="<?= (int)$item['display_order'] ?>"></td>
-                    <td>
-                      <div class="row-actions">
-                        <form id="<?= e($contentFormId) ?>" method="POST" enctype="multipart/form-data">
-                          <input type="hidden" name="action" value="update_content_item">
-                          <input type="hidden" name="csrf_token" value="<?= e($csrfContentItem) ?>">
-                          <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
-                          <button class="save-row-btn" type="submit">Save</button>
-                        </form>
-                        <form method="POST" onsubmit="return confirm('Remove this page item?')">
-                          <input type="hidden" name="action" value="delete_content_item">
-                          <input type="hidden" name="csrf_token" value="<?= e($csrfContentItemDelete) ?>">
-                          <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
-                          <button class="delete-row-btn" type="submit">Remove</button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
+        <div class="item-editor-list">
+          <?php if (!$contentItems): ?>
+            <div class="publish-card" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</div>
+          <?php endif; ?>
+          <?php foreach ($contentItems as $item): ?>
+            <div class="item-editor-card" data-content-type="<?= e($item['item_type']) ?>">
+              <div class="item-editor-head">
+                <div class="item-editor-title">
+                  <?php if ($item['image_url']): ?><img class="thumb" src="<?= e($item['image_url']) ?>" alt=""><?php endif; ?>
+                  <div>
+                    <strong><?= e($item['title']) ?></strong>
+                    <span><?= e(($contentTypes[$item['item_type']] ?? $item['item_type']) . ' - ' . ($item['subtitle'] ?: 'No subtitle')) ?></span>
+                  </div>
+                </div>
+                <span class="method-badge">Order <?= (int)$item['display_order'] ?></span>
+              </div>
+              <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="update_content_item">
+                <input type="hidden" name="csrf_token" value="<?= e($csrfContentItem) ?>">
+                <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
+                <div class="item-editor-fields">
+                  <div class="form-group">
+                    <label>Content Type</label>
+                    <select class="form-control" name="item_type">
+                      <?php foreach ($contentTypes as $value => $label): ?>
+                        <option value="<?= e($value) ?>" <?= $item['item_type'] === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Title / Name *</label>
+                    <input class="form-control" name="title" value="<?= e($item['title']) ?>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Subtitle / Role / Category</label>
+                    <input class="form-control" name="subtitle" value="<?= e($item['subtitle'] ?? '') ?>">
+                  </div>
+                  <div class="form-group">
+                    <label>Meta Value</label>
+                    <input class="form-control" name="meta_value" value="<?= e($item['meta_value'] ?? '') ?>" placeholder="Initials, number, or icon key">
+                  </div>
+                  <div class="form-group wide">
+                    <label>Description / Answer</label>
+                    <textarea class="form-control" name="body" rows="4"><?= e($item['body'] ?? '') ?></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Replacement Image</label>
+                    <input class="form-control" type="file" name="content_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                  </div>
+                  <div class="form-group">
+                    <label>Image URL / Current Image</label>
+                    <input class="form-control" name="image_url" value="<?= e($item['image_url'] ?? '') ?>" placeholder="images/... or URL">
+                  </div>
+                  <div class="form-group">
+                    <label>Display Order</label>
+                    <input class="form-control" type="number" name="display_order" value="<?= (int)$item['display_order'] ?>">
+                  </div>
+                </div>
+                <div class="item-editor-actions">
+                  <button class="save-row-btn" type="submit">Save Changes</button>
+                </div>
+              </form>
+              <form method="POST" onsubmit="return confirm('Remove this page item?')">
+                <input type="hidden" name="action" value="delete_content_item">
+                <input type="hidden" name="csrf_token" value="<?= e($csrfContentItemDelete) ?>">
+                <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
+                <button class="delete-row-btn" type="submit">Remove</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
         </div>
       </section>
 
@@ -803,18 +840,26 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
 
       <section class="admin-section" id="messages">
         <div class="admin-section-header"><div><h3>Messages & Enquiries</h3><p>Contact form and floating message submissions.</p></div></div>
-        <div class="data-table-wrap">
-          <div class="table-scroll">
-          <table class="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Subject / Type</th><th>Message</th><th>Date</th></tr></thead>
-            <tbody>
-              <?php if (!$messages): ?><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">No messages received yet.</td></tr><?php endif; ?>
-              <?php foreach ($messages as $m): ?>
-                <tr><td><strong><?= e($m['name']) ?></strong></td><td><?= e($m['email'] ?: '-') ?></td><td><?= e($m['subject'] ?: $m['message_type']) ?></td><td class="msg-content"><?= e($m['message']) ?></td><td><?= e(date('d M Y', strtotime($m['created_at']))) ?></td></tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-          </div>
+        <div class="message-list">
+          <?php if (!$messages): ?>
+            <div class="publish-card" style="text-align:center;color:var(--gray);padding:2rem">No messages received yet.</div>
+          <?php endif; ?>
+          <?php foreach ($messages as $m): ?>
+            <article class="message-card">
+              <div class="message-card-head">
+                <div>
+                  <h4 style="margin:0 0 0.25rem;color:var(--blue-dark)"><?= e($m['subject'] ?: ucfirst($m['message_type'])) ?></h4>
+                  <div class="message-meta">
+                    From <strong><?= e($m['name']) ?></strong>
+                    - <?= e($m['email'] ?: 'No email provided') ?>
+                    - <?= e(date('d M Y, h:i A', strtotime($m['created_at']))) ?>
+                  </div>
+                </div>
+                <span class="method-badge"><?= e(ucfirst($m['message_type'])) ?></span>
+              </div>
+              <div class="message-body"><?= e($m['message']) ?></div>
+            </article>
+          <?php endforeach; ?>
         </div>
       </section>
 

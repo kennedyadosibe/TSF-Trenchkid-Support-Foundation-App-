@@ -33,9 +33,9 @@ The Page Items Manager controls repeatable sections:
 
 The manager includes filters so admins can view one content type at a time.
 
-Existing page items can be edited directly from the table. Admins can change names, roles, descriptions, ordering, initials/stat values, URLs, and upload a replacement image without deleting the item.
+Existing page items can be edited directly from dedicated editor cards. Admins can change names, roles, descriptions, ordering, initials/stat values, URLs, and upload a replacement image without deleting the item.
 
-Row save buttons copy the edited table values into the submitted form before posting, so inline edits for team credentials and other page items save reliably.
+Each editor card uses a normal self-contained form, so Team, Advisor, and other page-item changes submit reliably with their matching Save Changes button.
 
 These records are stored in `content_items` and loaded on public pages through `BACKEND/content_items.php`.
 
@@ -66,3 +66,7 @@ Uploaded page header images are stored in `images/page/` and applied on the publ
 ## Public Rendering
 
 The script `js/page-content.js` replaces static fallback content on Team, Impact, and Contact pages when database content is available.
+
+## Messages
+
+The Messages panel displays each enquiry as a full readable card with sender details, subject/type, date, and the complete message body.

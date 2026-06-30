@@ -12,7 +12,8 @@ Date: 2026-06-30
 - Connected public page hero sections to admin-managed image settings.
 - Kept remove actions available beside save actions.
 - Verified dashboard renders the editable rows and upload fields after login.
-- Added a row-save compatibility helper so inline edits submit all edited values reliably.
+- Replaced the Page Items table editor with self-contained editor cards so Team, Advisor, and other item edits save reliably.
+- Changed Messages from clipped table text to full readable message cards.
 - Fixed admin content storage so text is saved cleanly and escaped only during display.
 
 ## Notes
@@ -21,3 +22,4 @@ Date: 2026-06-30
 - Programs/testimonials/FAQs/regions/impact stats can also be changed from Page Items Manager.
 - Gallery pictures can be replaced directly from Gallery Photos.
 - Page header pictures can be changed directly from each page editor.
+- Admins can now read the full body of received messages without truncated text.
