@@ -43,6 +43,7 @@ These records are stored in `content_items` and loaded on public pages through `
 
 - Content item images upload into `images/content/`.
 - Gallery images upload into `images/gallery/`.
+- Article cover images upload into `images/news/`.
 - Accepted image types: JPG, PNG, WebP, GIF.
 - Maximum upload size: 4MB.
 
@@ -70,3 +71,7 @@ The script `js/page-content.js` replaces static fallback content on Team, Impact
 ## Messages
 
 The Messages panel displays each enquiry as a full readable card with sender details, subject/type, date, and the complete message body.
+
+## Article Publishing
+
+The Publish Article panel supports optional cover image upload. Uploaded covers are saved to `images/news/`, stored in the `news.cover_image` field, shown in the Recent Articles admin table, and rendered on the public News page through `BACKEND/fetch_news.php`.

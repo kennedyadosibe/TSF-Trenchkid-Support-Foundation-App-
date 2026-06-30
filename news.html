@@ -192,6 +192,16 @@
   <script src="js/time.js"></script>
   <script src="js/components.js"></script>
   <script>
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
+    }
+
     // Load admin-published articles from the backend
     async function loadPublishedArticles() {
       const container = document.getElementById('published-articles');
@@ -210,17 +220,18 @@
         card.className = 'news-card fade-up';
         card.style.marginTop = '2rem';
         const date = new Date(a.published_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        const cover = a.cover_image || 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400&q=80';
         card.innerHTML = `
-          <img class="news-card-img" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400&q=80" alt="${a.title}" style="background:var(--blue-dark)">
+          <img class="news-card-img" src="${escapeHtml(cover)}" alt="${escapeHtml(a.title)}" style="background:var(--blue-dark)">
           <div class="news-card-body">
             <div class="news-meta">
-              <span class="news-cat">${a.category || 'General'}</span>
-              <span class="news-date">${date}</span>
+              <span class="news-cat">${escapeHtml(a.category || 'General')}</span>
+              <span class="news-date">${escapeHtml(date)}</span>
             </div>
-            <h3 class="news-card-title"><a href="news.html">${a.title}</a></h3>
-            <p class="news-excerpt">${a.excerpt || ''}...</p>
+            <h3 class="news-card-title"><a href="news.html">${escapeHtml(a.title)}</a></h3>
+            <p class="news-excerpt">${escapeHtml(a.excerpt || '')}...</p>
             <div class="news-footer">
-              <span class="news-author">By <strong>${a.author_name || 'TSF Admin'}</strong></span>
+              <span class="news-author">By <strong>${escapeHtml(a.author_name || 'TSF Admin')}</strong></span>
               <span style="font-size:0.8rem;color:var(--gray)">Published</span>
             </div>
           </div>`;

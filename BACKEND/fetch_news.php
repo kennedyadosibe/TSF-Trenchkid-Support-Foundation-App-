@@ -37,6 +37,7 @@ $total = (int)$countStmt->fetchColumn();
 
 $stmt = $pdo->prepare(
     "SELECT id, title, slug, category, author_name, is_featured, published_at,
+            cover_image,
             SUBSTRING(content, 1, 250) AS excerpt
      FROM news WHERE $whereSQL
      ORDER BY is_featured DESC, published_at DESC LIMIT ? OFFSET ?"

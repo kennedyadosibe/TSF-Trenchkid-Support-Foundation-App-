@@ -66,24 +66,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publi
         $category = cleanText($_POST['category'] ?? 'General');
         $author = cleanText($_POST['author'] ?? ($_SESSION['admin_name'] ?? 'TSF Admin'));
         $featured = !empty($_POST['is_featured']) ? 1 : 0;
+        $coverImage = '';
+        $uploaded = $_FILES['cover_image'] ?? null;
+        $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
         $allowed = ['Education','Digital Skills','Health','Community','Partnership','Announcement','General'];
         if (!in_array($category, $allowed, true)) $category = 'General';
+        if ($hasUpload) $coverImage = uploadManagedImage($uploaded, 'news', $title, $publishError);
 
         if (strlen($title) < 5) {
             $publishError = 'Title must be at least 5 characters.';
         } elseif (strlen($content) < 30) {
             $publishError = 'Content must be at least 30 characters.';
-        } else {
+        } elseif ($publishError === '') {
             $slug = strtolower(trim($title));
             $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
             $slug = preg_replace('/[\s-]+/', '-', $slug);
             $slug = trim($slug, '-') . '-' . substr(uniqid(), -6);
 
             $stmt = $pdo->prepare(
-                'INSERT INTO news (title, slug, content, category, author_name, author_id, is_published, is_featured, published_at)
-                 VALUES (?, ?, ?, ?, ?, ?, 1, ?, NOW())'
+                'INSERT INTO news (title, slug, content, category, author_name, author_id, cover_image, is_published, is_featured, published_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, NOW())'
             );
-            $stmt->execute([$title, $slug, $content, $category, $author ?: 'TSF Admin', $_SESSION['admin_id'], $featured]);
+            $stmt->execute([$title, $slug, $content, $category, $author ?: 'TSF Admin', $_SESSION['admin_id'], $coverImage ?: null, $featured]);
             $publishMessage = 'Article published successfully.';
             $activePanel = 'publish';
         }
@@ -300,7 +304,7 @@ $donors = $pdo->query(
      FROM donors ORDER BY created_at DESC LIMIT 100'
 )->fetchAll();
 $recentNews = $pdo->query(
-    'SELECT title, category, author_name, published_at FROM news ORDER BY created_at DESC LIMIT 8'
+    'SELECT title, category, author_name, cover_image, published_at FROM news ORDER BY created_at DESC LIMIT 8'
 )->fetchAll();
 $messages = $pdo->query(
     'SELECT name, email, subject, message_type, message, created_at FROM messages ORDER BY created_at DESC LIMIT 50'
@@ -789,7 +793,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
         <div class="publish-card">
           <?php if ($publishMessage): ?><div class="alert alert-success show"><?= e($publishMessage) ?></div><?php endif; ?>
           <?php if ($publishError): ?><div class="alert alert-error show"><?= e($publishError) ?></div><?php endif; ?>
-          <form method="POST" novalidate>
+          <form method="POST" enctype="multipart/form-data" novalidate>
             <input type="hidden" name="action" value="publish_article">
             <input type="hidden" name="csrf_token" value="<?= e($csrfPublish) ?>">
             <div class="form-group">
@@ -813,6 +817,11 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
               <label for="is_featured" style="margin:0">Mark as featured</label>
             </div>
             <div class="form-group">
+              <label>Cover Image</label>
+              <input class="form-control" type="file" name="cover_image" accept="image/jpeg,image/png,image/webp,image/gif">
+              <p class="settings-help" style="margin:0.45rem 0 0">Upload a JPG, PNG, WebP, or GIF up to 4MB. This image appears with the article on the public News page.</p>
+            </div>
+            <div class="form-group">
               <label>Article Content *</label>
               <textarea name="content" class="form-control" rows="8" placeholder="Write the full article content here..." required></textarea>
             </div>
@@ -826,11 +835,17 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
         <div class="data-table-wrap">
           <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th></tr></thead>
+            <thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th></tr></thead>
             <tbody>
-              <?php if (!$recentNews): ?><tr><td colspan="4" style="text-align:center;color:var(--gray);padding:2rem">No articles published yet.</td></tr><?php endif; ?>
+              <?php if (!$recentNews): ?><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">No articles published yet.</td></tr><?php endif; ?>
               <?php foreach ($recentNews as $n): ?>
-                <tr><td><strong><?= e($n['title']) ?></strong></td><td><?= e($n['category']) ?></td><td><?= e($n['author_name']) ?></td><td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : '-' ?></td></tr>
+                <tr>
+                  <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= filter_var($n['cover_image'], FILTER_VALIDATE_URL) ? e($n['cover_image']) : '../' . e($n['cover_image']) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
+                  <td><strong><?= e($n['title']) ?></strong></td>
+                  <td><?= e($n['category']) ?></td>
+                  <td><?= e($n['author_name']) ?></td>
+                  <td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : '-' ?></td>
+                </tr>
               <?php endforeach; ?>
             </tbody>
           </table>
