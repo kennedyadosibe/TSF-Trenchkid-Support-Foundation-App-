@@ -11,8 +11,19 @@ $settingsMessage = '';
 $settingsError = '';
 $galleryMessage = '';
 $galleryError = '';
+$contentMessage = '';
+$contentError = '';
 $accountMessage = '';
 $accountError = '';
+$contentTypes = [
+    'team_member' => 'Team Member',
+    'advisor' => 'Advisor',
+    'impact_stat' => 'Impact Stat',
+    'program' => 'Program',
+    'testimonial' => 'Testimonial',
+    'region' => 'Region',
+    'faq' => 'FAQ',
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publish_article') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'publish')) {
@@ -51,8 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
         $settingsError = 'Security validation failed. Please try again.';
     } else {
         $allowedSettings = getContentSettingKeys();
+        $postedKeys = array_values(array_intersect($allowedSettings, $_POST['setting_keys'] ?? []));
+        if (!$postedKeys) {
+            $postedKeys = $allowedSettings;
+        }
         $stmt = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
-        foreach ($allowedSettings as $key) {
+        foreach ($postedKeys as $key) {
             $stmt->execute([$key, trim($_POST[$key] ?? '')]);
         }
         $settingsMessage = 'Site content updated successfully.';
@@ -129,6 +144,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_content_item') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'content_item')) {
+        $contentError = 'Security validation failed. Please try again.';
+    } else {
+        $itemType = $_POST['item_type'] ?? '';
+        $title = sanitize($_POST['title'] ?? '');
+        $subtitle = sanitize($_POST['subtitle'] ?? '');
+        $body = trim($_POST['body'] ?? '');
+        $metaValue = sanitize($_POST['meta_value'] ?? '');
+        $imageUrl = trim($_POST['image_url'] ?? '');
+        $order = (int)($_POST['display_order'] ?? 0);
+        $uploaded = $_FILES['content_image'] ?? null;
+        $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
+
+        if (!isset($contentTypes[$itemType])) {
+            $contentError = 'Choose a valid content type.';
+        } elseif ($title === '') {
+            $contentError = 'Title is required.';
+        }
+
+        if ($contentError === '' && $hasUpload) {
+            if (($uploaded['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK || (($uploaded['size'] ?? 0) > 4 * 1024 * 1024)) {
+                $contentError = 'Upload a valid image up to 4MB.';
+            } else {
+                $tmpPath = $uploaded['tmp_name'] ?? '';
+                $imageInfo = $tmpPath ? @getimagesize($tmpPath) : false;
+                $allowedTypes = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp', IMAGETYPE_GIF => 'gif'];
+                if (!$imageInfo || !isset($allowedTypes[$imageInfo[2]])) {
+                    $contentError = 'Upload a valid JPG, PNG, WebP, or GIF image.';
+                } else {
+                    $uploadDir = dirname(__DIR__) . '/images/content';
+                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                    $slugBase = trim(strtolower(preg_replace('/[^a-z0-9]+/', '-', $title)), '-') ?: 'content';
+                    $filename = $slugBase . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $allowedTypes[$imageInfo[2]];
+                    if (!move_uploaded_file($tmpPath, $uploadDir . '/' . $filename)) {
+                        $contentError = 'Could not save the uploaded image.';
+                    } else {
+                        $imageUrl = 'images/content/' . $filename;
+                    }
+                }
+            }
+        }
+
+        if ($contentError === '') {
+            $stmt = $pdo->prepare('INSERT INTO content_items (item_type, title, subtitle, body, meta_value, image_url, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
+            $stmt->execute([$itemType, $title, $subtitle, $body, $metaValue, $imageUrl, $order]);
+            $contentMessage = $contentTypes[$itemType] . ' added.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_content_item') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'content_item_delete')) {
+        $contentError = 'Security validation failed. Please try again.';
+    } else {
+        $stmt = $pdo->prepare('UPDATE content_items SET is_active = 0 WHERE id = ?');
+        $stmt->execute([(int)($_POST['content_item_id'] ?? 0)]);
+        $contentMessage = 'Content item removed.';
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_account') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'account')) {
         $accountError = 'Security validation failed. Please try again.';
@@ -150,6 +226,8 @@ $csrfPublish = generateCsrfToken('publish');
 $csrfSettings = generateCsrfToken('settings');
 $csrfGallery = generateCsrfToken('gallery');
 $csrfGalleryDelete = generateCsrfToken('gallery_delete');
+$csrfContentItem = generateCsrfToken('content_item');
+$csrfContentItemDelete = generateCsrfToken('content_item_delete');
 $csrfAccount = generateCsrfToken('account');
 $settingsRows = $pdo->query('SELECT setting_key, setting_value FROM site_settings')->fetchAll();
 $contentDefinitions = getContentDefinitions();
@@ -174,6 +252,9 @@ $messages = $pdo->query(
 $galleryItems = $pdo->query(
     'SELECT id, title, caption, image_url, category, display_order, created_at FROM gallery WHERE is_active = 1 ORDER BY display_order ASC, created_at DESC'
 )->fetchAll();
+$contentItems = $pdo->query(
+    'SELECT id, item_type, title, subtitle, body, meta_value, image_url, display_order FROM content_items WHERE is_active = 1 ORDER BY item_type ASC, display_order ASC, created_at ASC'
+)->fetchAll();
 $adminAccountStmt = $pdo->prepare('SELECT full_name, email FROM admin WHERE id = ?');
 $adminAccountStmt->execute([$_SESSION['admin_id']]);
 $adminAccount = $adminAccountStmt->fetch() ?: ['full_name' => '', 'email' => ''];
@@ -195,6 +276,36 @@ function networkText($network): string {
         'telecel' => 'Telecel',
         'airteltigo' => 'AirtelTigo',
     ][$network] ?? '';
+}
+
+function sectionIdFromGroup(string $groupName): string {
+    return [
+        'Global' => 'page-global',
+        'Home Page' => 'page-home',
+        'About Page' => 'page-about',
+        'Impact Page' => 'page-impact',
+        'Team Page' => 'page-team',
+        'News Page' => 'page-news',
+        'Donate Page' => 'page-donate',
+        'Contact Page' => 'page-contact',
+        'Gallery Page' => 'page-gallery',
+        'Social Links' => 'page-social',
+    ][$groupName] ?? 'page-' . strtolower(preg_replace('/[^a-z0-9]+/i', '-', $groupName));
+}
+
+function pageDescription(string $groupName): string {
+    return [
+        'Global' => 'Edit the site-wide name, tagline, and mission statement.',
+        'Home Page' => 'Edit the homepage hero, intro, values, and call-to-action copy.',
+        'About Page' => 'Edit the About page story, journey intro, and call-to-action.',
+        'Impact Page' => 'Edit Impact page headings and reach text. Impact cards are managed below.',
+        'Team Page' => 'Edit Team page headings and call-to-action. Team members are managed below.',
+        'News Page' => 'Edit News page headings and sidebar text. Articles are managed below.',
+        'Donate Page' => 'Edit the Donate page copy, form intro, security note, and thank-you message.',
+        'Contact Page' => 'Edit contact copy, address, phone, email, office hours, and volunteer text.',
+        'Gallery Page' => 'Edit gallery page copy. Gallery photos are managed below.',
+        'Social Links' => 'Edit the public social media links used on the site.',
+    ][$groupName] ?? 'Edit this page content.';
 }
 ?>
 <!DOCTYPE html>
@@ -297,12 +408,23 @@ function networkText($network): string {
       <ul class="sidebar-nav">
         <li class="sidebar-section-label">Overview</li>
         <li><a class="active" href="#overview"><span>O</span>Dashboard</a></li>
+        <li class="sidebar-section-label">Pages</li>
+        <li><a href="#page-global"><span>G</span>Global</a></li>
+        <li><a href="#page-home"><span>H</span>Home</a></li>
+        <li><a href="#page-about"><span>A</span>About</a></li>
+        <li><a href="#page-team"><span>T</span>Team</a></li>
+        <li><a href="#page-impact"><span>I</span>Impact</a></li>
+        <li><a href="#page-gallery"><span>P</span>Gallery</a></li>
+        <li><a href="#page-news"><span>N</span>News</a></li>
+        <li><a href="#page-donate"><span>D</span>Donate</a></li>
+        <li><a href="#page-contact"><span>C</span>Contact</a></li>
+        <li><a href="#page-social"><span>S</span>Social Links</a></li>
         <li class="sidebar-section-label">Donations</li>
         <li><a href="#donors"><span>D</span>Donor Records</a></li>
-        <li class="sidebar-section-label">Content</li>
-        <li><a href="#settings"><span>S</span>Site Settings</a></li>
-        <li><a href="#gallery"><span>G</span>Gallery</a></li>
-        <li><a href="#publish"><span>P</span>Publish Article</a></li>
+        <li class="sidebar-section-label">Managers</li>
+        <li><a href="#content-items"><span>C</span>Page Items</a></li>
+        <li><a href="#gallery"><span>G</span>Gallery Photos</a></li>
+        <li><a href="#publish"><span>P</span>Articles</a></li>
         <li class="sidebar-section-label">Messages</li>
         <li><a href="#messages"><span>M</span>Messages</a></li>
         <li class="sidebar-section-label">Account</li>
@@ -320,7 +442,7 @@ function networkText($network): string {
             <p>Manage donations, content, gallery items, articles, and site account settings from one place.</p>
           </div>
           <div class="dashboard-actions">
-            <a class="action-chip" href="#settings">Edit Site</a>
+            <a class="action-chip" href="#page-home">Edit Site</a>
             <a class="action-chip secondary" href="#gallery">Manage Gallery</a>
             <a class="action-chip secondary" href="../index.html" target="_blank">View Website</a>
           </div>
@@ -360,41 +482,99 @@ function networkText($network): string {
         </div>
       </section>
 
-      <section class="admin-section" id="settings">
-        <div class="admin-section-header"><div><h3>Site Settings</h3><p>Edit public page copy and contact details without touching code.</p></div></div>
-        <div class="publish-card">
-          <?php if ($settingsMessage): ?><div class="alert alert-success show"><?= e($settingsMessage) ?></div><?php endif; ?>
-          <?php if ($settingsError): ?><div class="alert alert-error show"><?= e($settingsError) ?></div><?php endif; ?>
-          <p class="settings-help">Edit public site text, contact details, and social links here. The public pages load these values from the backend, so you do not need to touch code for ordinary content updates.</p>
-          <div class="settings-toolbar">
-            <input class="form-control settings-search" id="settings-search" type="search" placeholder="Search editable fields...">
-            <div class="settings-actions">
-              <button type="button" class="mini-btn" id="expand-settings">Expand all</button>
-              <button type="button" class="mini-btn" id="collapse-settings">Collapse all</button>
+      <?php foreach ($contentDefinitions as $groupName => $fields): ?>
+        <section class="admin-section page-editor-section" id="<?= e(sectionIdFromGroup($groupName)) ?>">
+          <div class="admin-section-header">
+            <div>
+              <h3><?= e($groupName) ?></h3>
+              <p><?= e(pageDescription($groupName)) ?></p>
             </div>
+            <a class="action-chip secondary" href="../<?= sectionIdFromGroup($groupName) === 'page-home' ? 'index' : str_replace(['page-', 'global', 'social'], ['', 'index', 'contact'], sectionIdFromGroup($groupName)) ?>.html" target="_blank">Preview</a>
           </div>
-          <form method="POST">
-            <input type="hidden" name="action" value="save_settings">
-            <input type="hidden" name="csrf_token" value="<?= e($csrfSettings) ?>">
-            <?php foreach ($contentDefinitions as $groupName => $fields): ?>
-              <details class="content-group" open data-group="<?= e(strtolower($groupName)) ?>">
-                <summary><?= e($groupName) ?></summary>
-                <div class="form-grid">
-                  <?php foreach ($fields as $key => $field): ?>
-                    <div class="form-group">
-                      <label for="<?= e($key) ?>"><?= e($field['label']) ?></label>
-                      <?php if (($field['type'] ?? 'text') === 'textarea'): ?>
-                        <textarea class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" rows="3"><?= e($settings[$key] ?? '') ?></textarea>
-                      <?php else: ?>
-                        <input class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e($settings[$key] ?? '') ?>">
-                      <?php endif; ?>
-                    </div>
+          <div class="publish-card">
+            <?php if ($settingsMessage): ?><div class="alert alert-success show"><?= e($settingsMessage) ?></div><?php endif; ?>
+            <?php if ($settingsError): ?><div class="alert alert-error show"><?= e($settingsError) ?></div><?php endif; ?>
+            <form method="POST">
+              <input type="hidden" name="action" value="save_settings">
+              <input type="hidden" name="csrf_token" value="<?= e($csrfSettings) ?>">
+              <div class="form-grid">
+                <?php foreach ($fields as $key => $field): ?>
+                  <div class="form-group">
+                    <input type="hidden" name="setting_keys[]" value="<?= e($key) ?>">
+                    <label for="<?= e($key) ?>"><?= e($field['label']) ?></label>
+                    <?php if (($field['type'] ?? 'text') === 'textarea'): ?>
+                      <textarea class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" rows="3"><?= e($settings[$key] ?? '') ?></textarea>
+                    <?php else: ?>
+                      <input class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e($settings[$key] ?? '') ?>">
+                    <?php endif; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+              <button type="submit" class="btn btn-blue">Save <?= e($groupName) ?></button>
+            </form>
+          </div>
+        </section>
+      <?php endforeach; ?>
+
+      <section class="admin-section" id="content-items">
+        <div class="admin-section-header"><div><h3>Page Items Manager</h3><p>Manage repeatable content used by Team, Impact, Contact FAQ, and program sections.</p></div></div>
+        <div class="publish-card" style="margin-bottom:1.2rem">
+          <?php if ($contentMessage): ?><div class="alert alert-success show"><?= e($contentMessage) ?></div><?php endif; ?>
+          <?php if ($contentError): ?><div class="alert alert-error show"><?= e($contentError) ?></div><?php endif; ?>
+          <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="add_content_item">
+            <input type="hidden" name="csrf_token" value="<?= e($csrfContentItem) ?>">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Content Type *</label>
+                <select class="form-control" name="item_type" required>
+                  <?php foreach ($contentTypes as $value => $label): ?>
+                    <option value="<?= e($value) ?>"><?= e($label) ?></option>
                   <?php endforeach; ?>
-                </div>
-              </details>
-            <?php endforeach; ?>
-            <button type="submit" class="btn btn-blue btn-lg">Save Site Settings</button>
+                </select>
+              </div>
+              <div class="form-group"><label>Title / Name *</label><input class="form-control" name="title" placeholder="e.g. New team member, FAQ question, stat label" required></div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group"><label>Subtitle / Role / Category</label><input class="form-control" name="subtitle" placeholder="Role, category, location, or icon key"></div>
+              <div class="form-group"><label>Meta Value</label><input class="form-control" name="meta_value" placeholder="Initials, stat number, or short stat text"></div>
+            </div>
+            <div class="form-group"><label>Description / Answer</label><textarea class="form-control" name="body" rows="4" placeholder="Bio, program text, testimonial, FAQ answer, etc."></textarea></div>
+            <div class="form-grid-3">
+              <div class="form-group"><label>Upload Image</label><input class="form-control" type="file" name="content_image" accept="image/jpeg,image/png,image/webp,image/gif"></div>
+              <div class="form-group"><label>Image URL fallback</label><input class="form-control" name="image_url" placeholder="Optional external URL or images/..."></div>
+              <div class="form-group"><label>Order</label><input class="form-control" type="number" name="display_order" value="0"></div>
+            </div>
+            <p class="settings-help">Tip: Team uses Title, Subtitle, Description, Initials/Image. Impact stats use Title and Meta Value. FAQ uses Title as the question and Description as the answer.</p>
+            <button type="submit" class="btn btn-blue">Add Page Item</button>
           </form>
+        </div>
+        <div class="data-table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Type</th><th>Title</th><th>Subtitle</th><th>Meta</th><th>Order</th><th>Action</th></tr></thead>
+              <tbody>
+                <?php if (!$contentItems): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</td></tr><?php endif; ?>
+                <?php foreach ($contentItems as $item): ?>
+                  <tr>
+                    <td><span class="method-badge"><?= e($contentTypes[$item['item_type']] ?? $item['item_type']) ?></span></td>
+                    <td><strong><?= e($item['title']) ?></strong><br><span style="color:var(--gray);font-size:0.8rem"><?= e(substr((string)$item['body'], 0, 90)) ?></span></td>
+                    <td><?= e($item['subtitle'] ?: '-') ?></td>
+                    <td><?= e($item['meta_value'] ?: '-') ?></td>
+                    <td><?= (int)$item['display_order'] ?></td>
+                    <td>
+                      <form method="POST" onsubmit="return confirm('Remove this page item?')">
+                        <input type="hidden" name="action" value="delete_content_item">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfContentItemDelete) ?>">
+                        <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
+                        <button class="logout-btn" type="submit" style="color:#9b1c1c">Remove</button>
+                      </form>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

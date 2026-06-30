@@ -1,0 +1,55 @@
+USE tsf;
+
+CREATE TABLE IF NOT EXISTS content_items (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    item_type VARCHAR(60) NOT NULL,
+    title VARCHAR(220) NOT NULL,
+    subtitle VARCHAR(220) DEFAULT NULL,
+    body TEXT DEFAULT NULL,
+    meta_value VARCHAR(220) DEFAULT NULL,
+    image_url VARCHAR(600) DEFAULT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_content_item_seed (item_type, title),
+    INDEX idx_type_active_order (item_type, is_active, display_order, created_at)
+) ENGINE=InnoDB;
+
+INSERT INTO content_items (item_type, title, subtitle, body, meta_value, image_url, display_order) VALUES
+('team_member', 'Emmanuel K.', 'Founder & Executive Director', 'A social entrepreneur and youth advocate with 8+ years of experience in community development. Emmanuel founded TSF after witnessing talented youth unable to reach their potential due to poverty.', 'EK', NULL, 1),
+('team_member', 'Abena B.', 'Programs Director', 'A certified educator and child rights advocate. Abena oversees all TSF program delivery, ensuring every child receives maximum benefit from our interventions.', 'AB', NULL, 2),
+('team_member', 'Kwesi A.', 'Digital Skills Lead', 'A software developer and digital skills trainer passionate about bridging the tech gap. Kwesi leads TSF''s Digital Skills Academy and all technology initiatives.', 'KA', NULL, 3),
+('team_member', 'Fatima D.', 'Finance & Accountability', 'A certified accountant ensuring every donation is tracked, properly allocated, and reported transparently. Fatima upholds TSF''s commitment to financial integrity.', 'FD', NULL, 4),
+('team_member', 'Samuel A.', 'Community Outreach Coordinator', 'Samuel bridges TSF with communities across Ghana, identifying children in need, building local partnerships, and ensuring programmes reach those who need them most.', 'SA', NULL, 5),
+('team_member', 'Grace N.', 'Communications Manager', 'A media and communications specialist who tells TSF''s story to the world. Grace manages all outreach, social media, and donor communications with clarity and heart.', 'GN', NULL, 6),
+('advisor', 'Prof. Bernard Amoako', 'Education Specialist, UG', NULL, 'PB', NULL, 1),
+('advisor', 'Dr. Ama Owusu', 'Child Rights Advocate', NULL, 'DO', NULL, 2),
+('advisor', 'James Appiah', 'Tech Entrepreneur & Investor', NULL, 'JA', NULL, 3),
+('advisor', 'Mary Kusi', 'NGO Governance Expert', NULL, 'MK', NULL, 4),
+('impact_stat', 'Children Supported', 'child', NULL, '1247', NULL, 1),
+('impact_stat', 'Projects Completed', 'check', NULL, '48', NULL, 2),
+('impact_stat', 'Schools Partnered', 'school', NULL, '23', NULL, 3),
+('impact_stat', 'Digital Skills Trained', 'laptop', NULL, '380', NULL, 4),
+('program', 'School Support Program', 'Education', 'We sponsor school fees, uniforms, books, and stationery for children from families who cannot afford them, keeping 600+ children in school annually.', '600+ children kept in school per year', 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80', 1),
+('program', 'Digital Skills Academy', 'Technology', 'Our intensive digital training covers coding, graphic design, computer literacy, and entrepreneurship - giving youth a competitive edge in the digital economy.', '380+ graduates trained', 'https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=600&q=80', 2),
+('program', 'Youth Mentorship Program', 'Mentorship', 'We pair children with mentors from industry - developers, doctors, teachers, and entrepreneurs - who guide them through education and into career readiness.', '250+ mentor-mentee pairs active', 'https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=600&q=80', 3),
+('testimonial', 'Akosua K.', 'TSF Scholar, Bolga', 'TSF paid my school fees when my mother could no longer afford them. Today I am in my second year at university studying computer science. TSF did not just save my education - they saved my future.', 'AK', NULL, 1),
+('testimonial', 'Kofi M.', 'Digital Skills Graduate', 'Through TSF''s digital skills program, I learned how to design graphics. Now I run my own small design business and support my siblings. This foundation does not give charity - it gives power.', 'KM', NULL, 2),
+('testimonial', 'Esther A.', 'Volunteer Mentor', 'As a volunteer mentor with TSF, I have witnessed firsthand the transformation in these children''s confidence and ambition. Every session reminds me why this work matters so deeply.', 'EA', NULL, 3),
+('region', 'Upper East Region', NULL, NULL, NULL, NULL, 1),
+('region', 'Greater Accra', NULL, NULL, NULL, NULL, 2),
+('region', 'Brong-Ahafo', NULL, NULL, NULL, NULL, 3),
+('region', 'Northern Region', NULL, NULL, NULL, NULL, 4),
+('faq', 'How do I know my donation is being used properly?', NULL, 'TSF maintains full financial transparency. Every donation is recorded, tracked, and reported. We publish regular impact reports and our Finance Manager ensures strict accountability. You can view donation allocation on our Donate page.', NULL, NULL, 1),
+('faq', 'Can I donate from outside Ghana?', NULL, 'Absolutely! We accept international donations via Visa/Mastercard and Google Pay. International supporters are a vital part of our community - every contribution makes a difference regardless of where it comes from.', NULL, NULL, 2),
+('faq', 'How can I volunteer with TSF?', NULL, 'Select "Volunteer" in the contact form above and tell us your skills, availability, and what area you would like to contribute to. We welcome mentors, educators, tech professionals, healthcare workers, and administrators.', NULL, NULL, 3),
+('faq', 'How does TSF select children to support?', NULL, 'Children are identified through our community coordinators, school partnerships, and referrals from trusted community leaders. We assess financial need, academic potential, and family circumstances before enrolling a child in our programs.', NULL, NULL, 4),
+('faq', 'Can organisations partner with TSF?', NULL, 'Yes! We actively seek partnerships with schools, tech companies, healthcare organisations, and community groups. Select "Partnership" in the contact form and our team will reach out to discuss collaboration opportunities.', NULL, NULL, 5)
+ON DUPLICATE KEY UPDATE
+    subtitle = VALUES(subtitle),
+    body = VALUES(body),
+    meta_value = VALUES(meta_value),
+    image_url = VALUES(image_url),
+    display_order = VALUES(display_order),
+    is_active = 1;
