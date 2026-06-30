@@ -27,7 +27,10 @@ function renderHeader() {
           <span class="brand-tagline" data-setting="site_tagline">Empowering Children, Building Futures</span>
         </div>
       </a>
-      <div class="header-time" id="live-datetime">Loading...</div>
+      <div class="header-actions">
+        <div class="header-time" id="live-datetime">Loading...</div>
+        <a href="admin/login.php" class="admin-portal-link" title="Admin Portal" aria-label="Admin Portal">⚙</a>
+      </div>
     </div>
     <nav>
       <ul class="nav-links" id="nav-links">
