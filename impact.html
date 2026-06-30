@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Impact — Trenchkid Support Foundation</title>
+  <link rel="icon" href="images/tsf-logo.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .impact-hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
+    .impact-stat-card {
+      background: var(--white); border-radius: var(--radius); padding: 2rem 1.2rem;
+      text-align: center; box-shadow: var(--shadow);
+      border-top: 4px solid var(--blue); transition: var(--transition);
+    }
+    .impact-stat-card:hover { transform: translateY(-5px); border-top-color: var(--gold); }
+    .impact-stat-card .big-num { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: var(--blue); display: block; line-height: 1; }
+    .impact-stat-card .num-label { font-size: 0.85rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 0.5rem; }
+    .impact-stat-card .num-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+
+    /* PROGRAM BREAKDOWN */
+    .programs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .program-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
+    .program-card:hover { transform: translateY(-5px); }
+    .program-img { width: 100%; height: 190px; object-fit: cover; }
+    .program-body { padding: 1.5rem; }
+    .program-tag { font-size: 0.73rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); background: rgba(26,63,163,0.08); padding: 0.25rem 0.8rem; border-radius: 20px; }
+    .program-body h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--blue-dark); margin: 0.7rem 0 0.5rem; }
+    .program-body p { font-size: 0.88rem; color: var(--gray); line-height: 1.7; }
+    .program-stat { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-light); display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--blue); font-weight: 600; }
+
+    /* TESTIMONIALS */
+    .testimonials-bg { background: var(--off-white); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .testimonial-card { background: var(--white); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); position: relative; }
+    .testimonial-card::before { content: '"'; font-family: 'Playfair Display', serif; font-size: 5rem; color: rgba(26,63,163,0.08); position: absolute; top: -0.5rem; left: 1.2rem; line-height: 1; }
+    .testimonial-text { font-size: 0.92rem; color: var(--text); line-height: 1.78; margin-bottom: 1.3rem; font-style: italic; position: relative; z-index: 1; }
+    .testimonial-author { display: flex; align-items: center; gap: 0.8rem; }
+    .author-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
+    .author-initials { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--blue-light)); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; color: var(--white); flex-shrink: 0; }
+    .author-name { font-weight: 700; font-size: 0.92rem; color: var(--blue-dark); }
+    .author-role { font-size: 0.8rem; color: var(--gray); }
+    .stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 0.2rem; }
+
+    /* REACH MAP */
+    .reach-section { background: linear-gradient(135deg, var(--blue-dark), var(--blue)); padding: 4rem 0; }
+    .reach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .reach-text h2 { font-family: 'Playfair Display', serif; color: var(--white); font-size: clamp(1.7rem,3.5vw,2.3rem); margin-bottom: 1rem; }
+    .reach-text h2 span { color: var(--gold-light); }
+    .reach-text p { color: rgba(255,255,255,0.75); line-height: 1.8; margin-bottom: 1.5rem; }
+    .region-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .region-list li { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.9rem; font-size: 0.87rem; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 0.5rem; }
+    .region-list li::before { content: '📍'; font-size: 0.9rem; }
+    .reach-visual { background: rgba(255,255,255,0.06); border-radius: 20px; padding: 2.5rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+    .reach-visual .big-stat { font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 900; color: var(--gold-light); line-height: 1; }
+    .reach-visual p { color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-size: 1rem; }
+
+    @media(max-width:900px) { .impact-hero-stats { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:768px) {
+      .programs-grid, .testimonials-grid { grid-template-columns: 1fr; }
+      .reach-grid { grid-template-columns: 1fr; }
+      .region-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-hero">
+    <div class="page-hero-content">
+      <div class="breadcrumb"><a href="index.html">Home</a> › Impact</div>
+      <h1 data-setting="impact_hero_title">Our Impact</h1>
+      <p data-setting="impact_hero_body">Numbers tell part of the story. But behind every number is a child whose life has been transformed.</p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <section>
+    <div class="container">
+      <div class="section-header fade-up">
+        <div class="section-label">By The Numbers</div>
+        <h2 class="section-title" data-setting="impact_numbers_title">TSF in <span>Numbers</span></h2>
+        <p class="section-desc" data-setting="impact_numbers_body">Real results, real lives changed — tracked and verified.</p>
+      </div>
+      <div class="impact-hero-stats">
+        <div class="impact-stat-card fade-up">
+          <div class="num-icon">👧</div>
+          <span class="big-num" data-target="1247">0</span>
+          <div class="num-label">Children Supported</div>
+        </div>
+        <div class="impact-stat-card fade-up">
+          <div class="num-icon">✅</div>
+          <span class="big-num" data-target="48">0</span>
+          <div class="num-label">Projects Completed</div>
+        </div>
+        <div class="impact-stat-card fade-up">
+          <div class="num-icon">🏫</div>
+          <span class="big-num" data-target="23">0</span>
+          <div class="num-label">Schools Partnered</div>
+        </div>
+        <div class="impact-stat-card fade-up">
+          <div class="num-icon">💻</div>
+          <span class="big-num" data-target="380">0</span>
+          <div class="num-label">Digital Skills Trained</div>
+        </div>
+      </div>
+
+      <!-- PROGRAMS -->
+      <div class="section-header fade-up" style="margin-top:1rem">
+        <div class="section-label">Our Programs</div>
+        <h2 class="section-title" data-setting="impact_programs_title">What We <span>Do</span></h2>
+      </div>
+      <div class="programs-grid">
+        <div class="program-card fade-up">
+          <img class="program-img" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80" alt="Education Program">
+          <div class="program-body">
+            <span class="program-tag">Education</span>
+            <h3>School Support Program</h3>
+            <p>We sponsor school fees, uniforms, books, and stationery for children from families who cannot afford them, keeping 600+ children in school annually.</p>
+            <div class="program-stat">📚 600+ children kept in school per year</div>
+          </div>
+        </div>
+        <div class="program-card fade-up">
+          <img class="program-img" src="https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=600&q=80" alt="Digital Skills">
+          <div class="program-body">
+            <span class="program-tag">Technology</span>
+            <h3>Digital Skills Academy</h3>
+            <p>Our intensive digital training covers coding, graphic design, computer literacy, and entrepreneurship — giving youth a competitive edge in the digital economy.</p>
+            <div class="program-stat">💻 380+ graduates trained</div>
+          </div>
+        </div>
+        <div class="program-card fade-up">
+          <img class="program-img" src="https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=600&q=80" alt="Mentorship">
+          <div class="program-body">
+            <span class="program-tag">Mentorship</span>
+            <h3>Youth Mentorship Program</h3>
+            <p>We pair children with mentors from industry — developers, doctors, teachers, and entrepreneurs — who guide them through education and into career readiness.</p>
+            <div class="program-stat">🤝 250+ mentor-mentee pairs active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-bg">
+    <div class="container">
+      <div class="section-header fade-up">
+        <div class="section-label">Testimonials</div>
+        <h2 class="section-title" data-setting="impact_testimonials_title">Voices of <span>Change</span></h2>
+        <p class="section-desc" data-setting="impact_testimonials_body">Hear directly from the children, families, and volunteers whose lives TSF has touched.</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">TSF paid my school fees when my mother could no longer afford them. Today I am in my second year at university studying computer science. TSF did not just save my education — they saved my future.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">AK</div>
+            <div>
+              <div class="author-name">Ama Korantema</div>
+              <div class="author-role">TSF Scholar, Kumasi</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">Through TSF's digital skills program, I learned how to design graphics. Now I run my own small design business and support my siblings. This foundation doesn't give charity — it gives power.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">KM</div>
+            <div>
+              <div class="author-name">Kwame Mensah</div>
+              <div class="author-role">Digital Skills Graduate, Accra</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">As a volunteer mentor with TSF, I have witnessed firsthand the transformation in these children's confidence and ambition. Every session reminds me why this work matters so deeply.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">EA</div>
+            <div>
+              <div class="author-name">Efua Asante</div>
+              <div class="author-role">Mentor & Volunteer, Sunyani</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">I donated to TSF last year and the impact report they shared showed exactly how my money was used. Transparency matters. I will continue to donate and encourage others to do the same.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">BD</div>
+            <div>
+              <div class="author-name">Bernard Darkwah</div>
+              <div class="author-role">International Donor, UK</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">My daughter's school placed TSF as a recommended partner. The health screenings and mentorship they provided gave her confidence she never had before. Remarkable work.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">FO</div>
+            <div>
+              <div class="author-name">Fatima Osei</div>
+              <div class="author-role">Parent, Tamale</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-up">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">TSF's community approach is unique — they don't parachute in and leave. They embed themselves, partner with local schools, and create lasting change. This is how development should work.</p>
+          <div class="testimonial-author">
+            <div class="author-initials">JA</div>
+            <div>
+              <div class="author-name">Jonas Adu-Gyamfi</div>
+              <div class="author-role">Community Leader, Ashanti</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REACH -->
+  <section class="reach-section">
+    <div class="container">
+      <div class="reach-grid">
+        <div class="reach-text fade-up">
+          <div class="section-label" style="background:rgba(255,255,255,0.1);color:var(--gold-light);border-color:rgba(212,160,23,0.3)">Our Reach</div>
+          <h2 data-setting="impact_reach_title">Spreading Across <span>Ghana</span></h2>
+          <p data-setting="impact_reach_body">What started in Kumasi has grown into a nationwide movement. TSF now operates across multiple regions of Ghana, partnering with local communities, schools, and organisations.</p>
+          <ul class="region-list">
+            <li>Ashanti Region</li>
+            <li>Greater Accra</li>
+            <li>Brong-Ahafo</li>
+            <li>Northern Region</li>
+            <li>Western Region</li>
+            <li>Eastern Region</li>
+          </ul>
+          <div style="margin-top:2rem">
+            <a href="donate.html" class="btn btn-gold btn-lg">💙 Support Our Expansion</a>
+          </div>
+        </div>
+        <div class="reach-visual fade-up">
+          <div class="big-stat">15+</div>
+          <p>Communities Actively Reached</p>
+          <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;text-align:center">
+              <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold-light);font-weight:900">6</div>
+              <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-top:0.3rem">Regions</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;text-align:center">
+              <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold-light);font-weight:900">23</div>
+              <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-top:0.3rem">Schools</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/time.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    // Counter animations
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('[data-target]').forEach(el => {
+            const target = parseInt(el.dataset.target);
+            let current = 0;
+            const step = target / (2000 / 16);
+            const timer = setInterval(() => {
+              current += step;
+              if (current >= target) { current = target; clearInterval(timer); }
+              el.textContent = Math.floor(current).toLocaleString() + '+';
+            }, 16);
+          });
+          counterObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelector('.impact-hero-stats') && counterObserver.observe(document.querySelector('.impact-hero-stats'));
+  </script>
+</body>
+</html>

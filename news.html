@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News & Articles - Trenchkid Support Foundation</title>
+  <link rel="icon" href="images/tsf-logo.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .news-layout { display: grid; grid-template-columns: 1fr 300px; gap: 3rem; align-items: start; }
+
+    /* NEWS CARDS */
+    .news-grid { display: grid; gap: 2rem; }
+    .news-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: grid; grid-template-columns: 280px 1fr; transition: var(--transition); }
+    .news-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(26,63,163,0.15); }
+    .news-card-img { width: 100%; height: 100%; min-height: 200px; object-fit: cover; }
+    .news-card-body { padding: 1.6rem; display: flex; flex-direction: column; }
+    .news-meta { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .news-cat { font-size: 0.73rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); background: rgba(26,63,163,0.08); padding: 0.25rem 0.8rem; border-radius: 20px; }
+    .news-date { font-size: 0.8rem; color: var(--gray); }
+    .news-card-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--blue-dark); margin-bottom: 0.6rem; line-height: 1.35; }
+    .news-card-title a { text-decoration: none; color: inherit; transition: color 0.2s; }
+    .news-card-title a:hover { color: var(--blue); }
+    .news-excerpt { font-size: 0.9rem; color: var(--gray); line-height: 1.72; flex: 1; }
+    .news-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--gray-light); }
+    .news-author { font-size: 0.82rem; color: var(--gray); }
+    .news-author strong { color: var(--blue-dark); }
+    .read-more { font-size: 0.85rem; font-weight: 700; color: var(--blue); text-decoration: none; display: flex; align-items: center; gap: 0.3rem; transition: gap 0.2s; }
+    .read-more:hover { gap: 0.6rem; }
+
+    /* FEATURED */
+    .featured-card { background: var(--white); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(26,63,163,0.15); overflow: hidden; margin-bottom: 2.5rem; }
+    .featured-img { width: 100%; height: 320px; object-fit: cover; }
+    .featured-badge { background: var(--gold); color: var(--blue-dark); font-size: 0.72rem; font-weight: 800; padding: 0.3rem 0.9rem; border-radius: 20px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .featured-body { padding: 2rem; }
+    .featured-title { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--blue-dark); margin: 0.8rem 0 0.7rem; line-height: 1.25; }
+    .featured-excerpt { font-size: 0.97rem; color: var(--gray); line-height: 1.78; margin-bottom: 1.2rem; }
+
+    /* SIDEBAR */
+    .sidebar-widget { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .sidebar-widget h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--blue-dark); margin-bottom: 1.1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--gold); }
+    .sidebar-cats { list-style: none; }
+    .sidebar-cats li { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-light); font-size: 0.88rem; color: var(--text); cursor: pointer; transition: var(--transition); }
+    .sidebar-cats li:hover { color: var(--blue); padding-left: 4px; }
+    .sidebar-cats .cat-count { background: var(--gray-light); color: var(--gray); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 10px; }
+
+    .recent-post { display: flex; gap: 0.8rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-light); }
+    .recent-post:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .recent-post-img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .recent-post-text { flex: 1; }
+    .recent-post-title { font-size: 0.87rem; font-weight: 600; color: var(--blue-dark); line-height: 1.4; margin-bottom: 0.2rem; }
+    .recent-post-date { font-size: 0.77rem; color: var(--gray); }
+
+    .no-articles { text-align: center; padding: 3rem; color: var(--gray); }
+    .no-articles .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    @media(max-width:900px) { .news-layout { grid-template-columns: 1fr; } }
+    @media(max-width:680px) {
+      .news-card { grid-template-columns: 1fr; }
+      .news-card-img { min-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-hero">
+    <div class="page-hero-content">
+      <div class="breadcrumb"><a href="index.html">Home</a> &gt; News</div>
+      <h1 data-setting="news_hero_title">News & Articles</h1>
+      <p data-setting="news_hero_body">Stay updated with the latest stories, updates, and announcements from Trenchkid Support Foundation.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="news-layout">
+        <div>
+          <!-- FEATURED -->
+          <div class="featured-card fade-up" id="featured-article">
+            <img class="featured-img" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1000&q=80" alt="Featured Article">
+            <div class="featured-body">
+              <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem">
+                <span class="featured-badge">Featured</span>
+                <span class="news-cat">Impact Story</span>
+                <span class="news-date">May 2025</span>
+              </div>
+              <h2 class="featured-title">TSF Celebrates 1,200 Children Supported - A Milestone of Hope</h2>
+              <p class="featured-excerpt">Trenchkid Support Foundation reached a historic milestone this month, officially recording over 1,200 children supported through its education, healthcare, and digital skills programs. What started as a small community initiative in Kumasi has blossomed into one of Ghana's most impactful youth empowerment foundations...</p>
+              <a href="news.html" class="btn btn-blue">Read Full Story -&gt;</a>
+            </div>
+          </div>
+
+          <!-- ARTICLES LIST -->
+          <div id="articles-list">
+            <div class="news-card fade-up">
+              <img class="news-card-img" src="https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=400&q=80" alt="Digital Skills Academy">
+              <div class="news-card-body">
+                <div class="news-meta">
+                  <span class="news-cat">Digital Skills</span>
+                  <span class="news-date">April 2025</span>
+                </div>
+                <h3 class="news-card-title"><a href="news.html">TSF Digital Skills Academy Graduates 80 New Coders in Kumasi</a></h3>
+                <p class="news-excerpt">Eighty young graduates received certificates at TSF's Digital Skills Academy graduation ceremony, marking the completion of a 12-week intensive coding and digital literacy program. Several graduates have already secured internships and freelance opportunities.</p>
+                <div class="news-footer">
+                  <span class="news-author">By <strong>TSF Communications</strong></span>
+                  <a href="news.html" class="read-more">Read More -&gt;</a>
+                </div>
+              </div>
+            </div>
+            <div class="news-card fade-up">
+              <img class="news-card-img" src="https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&q=80" alt="Health Outreach">
+              <div class="news-card-body">
+                <div class="news-meta">
+                  <span class="news-cat">Health</span>
+                  <span class="news-date">March 2025</span>
+                </div>
+                <h3 class="news-card-title"><a href="news.html">TSF Partners with Local Clinic for Free Children's Health Screening</a></h3>
+                <p class="news-excerpt">In collaboration with a local clinic, TSF organised free medical screenings for 200 children across three communities in Ashanti Region. The exercise identified nutritional deficiencies and vision problems among beneficiaries, who received treatment free of charge.</p>
+                <div class="news-footer">
+                  <span class="news-author">By <strong>Abena Boateng</strong></span>
+                  <a href="news.html" class="read-more">Read More -&gt;</a>
+                </div>
+              </div>
+            </div>
+            <div class="news-card fade-up">
+              <img class="news-card-img" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400&q=80" alt="Scholarship">
+              <div class="news-card-body">
+                <div class="news-meta">
+                  <span class="news-cat">Education</span>
+                  <span class="news-date">February 2025</span>
+                </div>
+                <h3 class="news-card-title"><a href="news.html">TSF Scholarship Fund Opens Applications for 2025/2026 Academic Year</a></h3>
+                <p class="news-excerpt">Applications are now open for the TSF Scholarship Fund, which will sponsor 150 children from underprivileged families for the upcoming academic year. Eligible applicants must demonstrate financial need and academic potential. Applications close 31st July 2025.</p>
+                <div class="news-footer">
+                  <span class="news-author">By <strong>Emmanuel Asante</strong></span>
+                  <a href="news.html" class="read-more">Read More -&gt;</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DYNAMICALLY PUBLISHED ARTICLES -->
+          <div id="published-articles"></div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+          <div class="sidebar-widget fade-up">
+            <h4>Categories</h4>
+            <ul class="sidebar-cats">
+              <li>Education <span class="cat-count">8</span></li>
+              <li>Digital Skills <span class="cat-count">5</span></li>
+              <li>Health <span class="cat-count">4</span></li>
+              <li>Community <span class="cat-count">6</span></li>
+              <li>Partnerships <span class="cat-count">3</span></li>
+              <li>Announcements <span class="cat-count">7</span></li>
+            </ul>
+          </div>
+          <div class="sidebar-widget fade-up">
+            <h4>Recent Posts</h4>
+            <div class="recent-post">
+              <img class="recent-post-img" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=100&q=80" alt="">
+              <div class="recent-post-text">
+                <div class="recent-post-title">TSF Celebrates 1,200 Children Supported</div>
+                <div class="recent-post-date">May 2025</div>
+              </div>
+            </div>
+            <div class="recent-post">
+              <img class="recent-post-img" src="https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=100&q=80" alt="">
+              <div class="recent-post-text">
+                <div class="recent-post-title">Digital Skills Academy Graduates 80 Coders</div>
+                <div class="recent-post-date">April 2025</div>
+              </div>
+            </div>
+            <div class="recent-post">
+              <img class="recent-post-img" src="https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=100&q=80" alt="">
+              <div class="recent-post-text">
+                <div class="recent-post-title">Free Health Screening for 200 Children</div>
+                <div class="recent-post-date">March 2025</div>
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-widget fade-up" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:var(--white)">
+            <h4 style="color:var(--gold-light);border-color:var(--gold)">Support Our Work</h4>
+            <p data-setting="news_sidebar_cta" style="font-size:0.88rem;color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:1.2rem">Every story you read represents a real child's life. Help us write more stories like these.</p>
+            <a href="donate.html" class="btn btn-gold" style="width:100%;justify-content:center">Donate Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/time.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    // Load admin-published articles from the backend
+    async function loadPublishedArticles() {
+      const container = document.getElementById('published-articles');
+      let articles = [];
+      try {
+        const res = await fetch('BACKEND/fetch_news.php?per_page=20', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!data.success) return;
+        articles = data.articles || [];
+      } catch (_) {
+        return;
+      }
+      if (!articles.length) return;
+      articles.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'news-card fade-up';
+        card.style.marginTop = '2rem';
+        const date = new Date(a.published_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        card.innerHTML = `
+          <img class="news-card-img" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400&q=80" alt="${a.title}" style="background:var(--blue-dark)">
+          <div class="news-card-body">
+            <div class="news-meta">
+              <span class="news-cat">${a.category || 'General'}</span>
+              <span class="news-date">${date}</span>
+            </div>
+            <h3 class="news-card-title"><a href="news.html">${a.title}</a></h3>
+            <p class="news-excerpt">${a.excerpt || ''}...</p>
+            <div class="news-footer">
+              <span class="news-author">By <strong>${a.author_name || 'TSF Admin'}</strong></span>
+              <span style="font-size:0.8rem;color:var(--gray)">Published</span>
+            </div>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+    loadPublishedArticles();
+  </script>
+</body>
+</html>

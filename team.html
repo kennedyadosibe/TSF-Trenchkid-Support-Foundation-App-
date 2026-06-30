@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Team - Trenchkid Support Foundation</title>
+  <link rel="icon" href="images/tsf-logo.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .team-card {
+      background: var(--white); border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow); transition: var(--transition); text-align: center;
+    }
+    .team-card:hover { transform: translateY(-8px); box-shadow: 0 24px 60px rgba(26,63,163,0.18); }
+    .team-img-wrap { position: relative; background: linear-gradient(135deg, var(--blue-dark), var(--blue)); padding-top: 2rem; }
+    .team-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 5px solid var(--white); margin: 0 auto; display: block; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+    .team-initials {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--blue-dark); border: 5px solid var(--white);
+      margin: 0 auto; display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900;
+      color: var(--gold-light); box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .team-wave { fill: var(--white); display: block; margin-top: -1px; }
+    .team-info { padding: 1rem 1.5rem 1.8rem; }
+    .team-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--blue-dark); margin-bottom: 0.25rem; }
+    .team-role { font-size: 0.82rem; font-weight: 700; color: var(--gold-dark); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.7rem; }
+    .team-bio { font-size: 0.87rem; color: var(--gray); line-height: 1.7; }
+    .team-socials { display: flex; justify-content: center; gap: 0.6rem; margin-top: 1rem; }
+    .social-link { width: 34px; height: 34px; border-radius: 50%; background: var(--gray-light); color: var(--blue-dark); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; text-decoration: none; transition: var(--transition); overflow: hidden; }
+    .social-link:hover { color: var(--white); }
+    .social-link:hover { background: var(--blue); transform: scale(1.15); }
+
+    .advisors-section { background: var(--off-white); }
+    .advisors-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+    .advisor-card { background: var(--white); border-radius: var(--radius-sm); padding: 1.5rem; text-align: center; box-shadow: var(--shadow); }
+    .advisor-initials { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--gold)); margin: 0 auto 0.8rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--white); font-size: 1.2rem; }
+    .advisor-name { font-weight: 700; font-size: 0.95rem; color: var(--blue-dark); }
+    .advisor-title { font-size: 0.8rem; color: var(--gray); margin-top: 0.2rem; }
+
+    .join-cta { background: linear-gradient(135deg, var(--blue-dark), var(--blue)); border-radius: 20px; padding: 3.5rem; text-align: center; color: var(--white); margin-top: 3rem; }
+    .join-cta h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.8rem; }
+    .join-cta p { color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
+
+    @media(max-width:900px) { .advisors-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:768px) { .team-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; } }
+    @media(max-width:480px) { .team-grid { grid-template-columns: 1fr; } .advisors-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page-hero">
+    <div class="page-hero-content">
+      <div class="breadcrumb"><a href="index.html">Home</a> &gt; Team</div>
+      <h1 data-setting="team_hero_title">Our Team</h1>
+      <p data-setting="team_hero_body">Meet the passionate individuals who dedicate their time and talent to empowering Ghana's children.</p>
+    </div>
+  </div>
+
+  <!-- LEADERSHIP TEAM -->
+  <section>
+    <div class="container">
+      <div class="section-header fade-up">
+        <div class="section-label">Leadership</div>
+        <h2 class="section-title" data-setting="team_leadership_title">The People Behind <span>TSF</span></h2>
+        <p class="section-desc" data-setting="team_leadership_body">Our team is built on passion, experience, and an unwavering belief in the potential of every child.</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">EK</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Emmanuel Kofi Asante</div>
+            <div class="team-role">Founder & Executive Director</div>
+            <p class="team-bio">A social entrepreneur and youth advocate with 8+ years of experience in community development. Emmanuel founded TSF after witnessing talented youth unable to reach their potential due to poverty.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link" title="LinkedIn">in</a>
+              <a href="contact.html" class="social-link" title="Twitter">X</a>
+              <a href="mailto:info@tsfghana.org" class="social-link" title="Email">@</a>
+            </div>
+          </div>
+        </div>
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">AB</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Abena Boateng</div>
+            <div class="team-role">Director of Programs</div>
+            <p class="team-bio">A certified educator and child rights advocate. Abena oversees all TSF program delivery, ensuring every child receives maximum benefit from our interventions.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link">in</a>
+              <a href="contact.html" class="social-link">X</a>
+              <a href="mailto:info@tsfghana.org" class="social-link">@</a>
+            </div>
+          </div>
+        </div>
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">KA</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Kwesi Acheampong</div>
+            <div class="team-role">Head of Technology</div>
+            <p class="team-bio">A software developer and digital skills trainer passionate about bridging the tech gap. Kwesi leads TSF's Digital Skills Academy and all technology initiatives.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link">in</a>
+              <a href="contact.html" class="social-link">web</a>
+              <a href="mailto:info@tsfghana.org" class="social-link">@</a>
+            </div>
+          </div>
+        </div>
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">FD</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Fatima Dankwah</div>
+            <div class="team-role">Finance & Accountability Manager</div>
+            <p class="team-bio">A certified accountant ensuring every donation is tracked, properly allocated, and reported transparently. Fatima upholds TSF's commitment to financial integrity.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link">in</a>
+              <a href="contact.html" class="social-link">fin</a>
+              <a href="mailto:info@tsfghana.org" class="social-link">@</a>
+            </div>
+          </div>
+        </div>
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">SA</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Samuel Adjei</div>
+            <div class="team-role">Community Outreach Coordinator</div>
+            <p class="team-bio">Samuel bridges TSF with communities across Ghana, identifying children in need, building local partnerships, and ensuring programmes reach those who need them most.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link">in</a>
+              <a href="contact.html" class="social-link">X</a>
+              <a href="mailto:info@tsfghana.org" class="social-link">@</a>
+            </div>
+          </div>
+        </div>
+        <div class="team-card fade-up">
+          <div class="team-img-wrap">
+            <div class="team-initials">GN</div>
+            <svg class="team-wave" viewBox="0 0 400 40"><path d="M0,20 Q100,40 200,20 T400,20 L400,40 L0,40 Z" fill="white"/></svg>
+          </div>
+          <div class="team-info">
+            <div class="team-name">Grace Nyarko</div>
+            <div class="team-role">Communications & PR Lead</div>
+            <p class="team-bio">A media and communications specialist who tells TSF's story to the world. Grace manages all outreach, social media, and donor communications with clarity and heart.</p>
+            <div class="team-socials">
+              <a href="contact.html" class="social-link">in</a>
+              <a href="contact.html" class="social-link">X</a>
+              <a href="mailto:info@tsfghana.org" class="social-link">@</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADVISORS -->
+  <section class="advisors-section">
+    <div class="container">
+      <div class="section-header fade-up">
+        <div class="section-label">Advisory Board</div>
+        <h2 class="section-title" data-setting="team_advisors_title">Our <span>Advisors</span></h2>
+        <p class="section-desc" data-setting="team_advisors_body">Experienced professionals who guide and support TSF's strategic direction.</p>
+      </div>
+      <div class="advisors-grid">
+        <div class="advisor-card fade-up">
+          <div class="advisor-initials">PB</div>
+          <div class="advisor-name">Prof. Bernard Amoako</div>
+          <div class="advisor-title">Education Specialist, UG</div>
+        </div>
+        <div class="advisor-card fade-up">
+          <div class="advisor-initials">DO</div>
+          <div class="advisor-name">Dr. Ama Owusu</div>
+          <div class="advisor-title">Child Rights Advocate</div>
+        </div>
+        <div class="advisor-card fade-up">
+          <div class="advisor-initials">JA</div>
+          <div class="advisor-name">James Appiah</div>
+          <div class="advisor-title">Tech Entrepreneur & Investor</div>
+        </div>
+        <div class="advisor-card fade-up">
+          <div class="advisor-initials">MK</div>
+          <div class="advisor-name">Mary Kusi</div>
+          <div class="advisor-title">NGO Governance Expert</div>
+        </div>
+      </div>
+
+      <div class="join-cta fade-up">
+        <h3 data-setting="team_cta_title">Join Our Team</h3>
+        <p data-setting="team_cta_body">Are you passionate about empowering children and building futures? TSF is always looking for dedicated volunteers, mentors, and partners to join our movement.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="contact.html" class="btn btn-gold btn-lg">Volunteer with TSF</a>
+          <a href="contact.html" class="btn btn-outline btn-lg">Partner with Us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/time.js"></script>
+  <script src="js/components.js"></script>
+</body>
+</html>
