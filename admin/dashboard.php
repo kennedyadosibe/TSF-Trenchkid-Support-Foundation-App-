@@ -68,11 +68,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_g
         $caption = trim($_POST['caption'] ?? '');
         $category = sanitize($_POST['category'] ?? 'General');
         $order = (int)($_POST['display_order'] ?? 0);
+        $uploaded = $_FILES['gallery_image'] ?? null;
+        $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
+
+        if ($hasUpload) {
+            if (($uploaded['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+                $galleryError = 'Image upload failed. Please choose another file.';
+            } elseif (($uploaded['size'] ?? 0) > 4 * 1024 * 1024) {
+                $galleryError = 'Gallery image must be 4MB or smaller.';
+            } else {
+                $tmpPath = $uploaded['tmp_name'] ?? '';
+                $imageInfo = $tmpPath ? @getimagesize($tmpPath) : false;
+                $allowedTypes = [
+                    IMAGETYPE_JPEG => 'jpg',
+                    IMAGETYPE_PNG => 'png',
+                    IMAGETYPE_WEBP => 'webp',
+                    IMAGETYPE_GIF => 'gif',
+                ];
+                if (!$imageInfo || !isset($allowedTypes[$imageInfo[2]])) {
+                    $galleryError = 'Upload a valid JPG, PNG, WebP, or GIF image.';
+                } else {
+                    $uploadDir = dirname(__DIR__) . '/images/gallery';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $slugBase = strtolower(preg_replace('/[^a-z0-9]+/', '-', $title ?: 'gallery'));
+                    $slugBase = trim($slugBase, '-') ?: 'gallery';
+                    $filename = $slugBase . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $allowedTypes[$imageInfo[2]];
+                    $targetPath = $uploadDir . '/' . $filename;
+                    if (!move_uploaded_file($tmpPath, $targetPath)) {
+                        $galleryError = 'Could not save the uploaded image.';
+                    } else {
+                        $imageUrl = 'images/gallery/' . $filename;
+                    }
+                }
+            }
+        }
+
         if ($title === '' || $imageUrl === '') {
-            $galleryError = 'Gallery title and image URL are required.';
-        } elseif (!filter_var($imageUrl, FILTER_VALIDATE_URL) && !preg_match('/^images\\//', $imageUrl)) {
-            $galleryError = 'Use a valid image URL or an images/ path.';
-        } else {
+            $galleryError = $galleryError ?: 'Gallery title and an uploaded image or image URL are required.';
+        } elseif ($galleryError === '' && !filter_var($imageUrl, FILTER_VALIDATE_URL) && !preg_match('/^images\\//', $imageUrl)) {
+            $galleryError = 'Use an uploaded image, a valid image URL, or an images/ path.';
+        }
+
+        if ($galleryError === '') {
             $stmt = $pdo->prepare('INSERT INTO gallery (title, caption, image_url, category, display_order, is_active) VALUES (?, ?, ?, ?, ?, 1)');
             $stmt->execute([$title, $caption, $imageUrl, $category ?: 'General', $order]);
             $galleryMessage = 'Gallery item added.';
@@ -167,52 +206,77 @@ function networkText($network): string {
   <link rel="icon" href="../images/tsf-logo.png">
   <link rel="stylesheet" href="../css/style.css">
   <style>
-    body { background: #f0f3fc; }
-    .admin-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: linear-gradient(135deg, var(--blue-dark), var(--blue)); padding: 0 1.5rem; height: 62px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 20px rgba(0,0,0,0.25); }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    body { background: #eef2f8; min-height: 100vh; }
+    .admin-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: linear-gradient(135deg, #071844, var(--blue-dark) 52%, var(--blue)); padding: 0 1.5rem; height: 68px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 12px 35px rgba(5,16,45,0.22); }
     .admin-header-brand { display: flex; align-items: center; gap: 0.8rem; }
-    .admin-header-brand img { height: 38px; }
+    .admin-header-brand img { height: 42px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22)); }
     .admin-header-brand span { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--white); }
     .admin-header-brand small { font-size: 0.7rem; color: var(--gold-light); display: block; letter-spacing: 1px; text-transform: uppercase; }
     .admin-header-right { display: flex; align-items: center; gap: 1rem; }
     .admin-user { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: var(--white); }
     .admin-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--blue-dark); }
-    .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: var(--white); padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.82rem; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; }
-    .admin-layout { display: flex; padding-top: 62px; min-height: 100vh; }
-    .admin-sidebar { width: 230px; background: var(--white); box-shadow: 2px 0 20px rgba(26,63,163,0.08); position: fixed; top: 62px; left: 0; bottom: 0; overflow-y: auto; padding: 1.5rem 0; }
+    .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: var(--white); padding: 0.45rem 0.95rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: var(--transition); }
+    .logout-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+    .admin-layout { display: flex; padding-top: 68px; min-height: 100vh; }
+    .admin-sidebar { width: 260px; background: #ffffff; border-right: 1px solid rgba(26,63,163,0.08); box-shadow: 10px 0 30px rgba(12,30,72,0.06); position: fixed; top: 68px; left: 0; bottom: 0; overflow-y: auto; padding: 1.25rem 0.9rem; }
     .sidebar-nav { list-style: none; }
-    .sidebar-nav li { margin: 0.15rem 0.8rem; }
-    .sidebar-nav a { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; color: var(--gray); text-decoration: none; transition: var(--transition); }
-    .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(26,63,163,0.1); color: var(--blue); font-weight: 700; }
-    .sidebar-section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gray); padding: 0.8rem 1.8rem 0.3rem; }
-    .admin-main { margin-left: 230px; flex: 1; padding: 2rem; }
-    .dashboard-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 2rem; }
-    .dash-stat { background: var(--white); border-radius: 14px; padding: 1.4rem; box-shadow: 0 4px 20px rgba(26,63,163,0.08); display: flex; align-items: center; gap: 1rem; }
-    .dash-stat-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; background: rgba(26,63,163,0.1); color: var(--blue); font-weight: 900; }
+    .sidebar-nav li { margin: 0.16rem 0; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.72rem 0.9rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: #5d6a84; text-decoration: none; transition: var(--transition); border: 1px solid transparent; }
+    .sidebar-nav a span { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: #f0f3fa; color: var(--blue); font-size: 0.8rem; font-weight: 900; flex-shrink: 0; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background: #eef4ff; color: var(--blue-dark); border-color: rgba(26,63,163,0.11); transform: translateX(2px); }
+    .sidebar-nav a.active span { background: var(--blue); color: var(--white); }
+    .sidebar-section-label { font-size: 0.67rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.8px; color: #97a2b6; padding: 0.95rem 0.75rem 0.35rem; }
+    .admin-main { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1480px; }
+    .dashboard-hero { background: linear-gradient(135deg, #ffffff, #f7f9ff); border: 1px solid rgba(26,63,163,0.08); border-radius: 18px; box-shadow: 0 12px 36px rgba(12,30,72,0.08); padding: 1.45rem 1.6rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .dashboard-hero h2 { font-family:'Playfair Display',serif; font-size:1.65rem; color:var(--blue-dark); margin-bottom:0.25rem; }
+    .dashboard-hero p { color:var(--gray); font-size:0.92rem; }
+    .dashboard-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: flex-end; }
+    .action-chip { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--blue); color: var(--white); text-decoration: none; padding: 0.68rem 0.95rem; border-radius: 999px; font-weight: 800; font-size: 0.84rem; box-shadow: 0 8px 20px rgba(26,63,163,0.18); transition: var(--transition); }
+    .action-chip.secondary { background: var(--white); color: var(--blue-dark); border: 1px solid rgba(26,63,163,0.14); box-shadow: none; }
+    .action-chip:hover { transform: translateY(-2px); }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .dash-stat { background: var(--white); border: 1px solid rgba(26,63,163,0.08); border-radius: 16px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(12,30,72,0.07); display: flex; align-items: center; gap: 1rem; position: relative; overflow: hidden; }
+    .dash-stat::after { content: ""; position: absolute; right: -28px; top: -28px; width: 88px; height: 88px; border-radius: 50%; background: rgba(212,160,23,0.12); }
+    .dash-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; background: rgba(26,63,163,0.1); color: var(--blue); font-weight: 900; }
     .dash-stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: var(--blue-dark); line-height: 1; }
     .dash-stat-label { font-size: 0.8rem; color: var(--gray); margin-top: 0.3rem; }
     .admin-main .admin-section { padding: 0; margin-bottom: 2rem; }
-    .admin-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
-    .admin-section-header h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--blue-dark); }
-    .data-table-wrap, .publish-card { background: var(--white); border-radius: 14px; box-shadow: 0 4px 20px rgba(26,63,163,0.08); overflow: hidden; }
-    .publish-card { padding: 2rem; }
+    .admin-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; }
+    .admin-section-header h3 { font-family: 'Playfair Display', serif; font-size: 1.28rem; color: var(--blue-dark); }
+    .admin-section-header p { color: var(--gray); font-size: 0.86rem; margin-top: 0.2rem; }
+    .data-table-wrap, .publish-card { background: var(--white); border: 1px solid rgba(26,63,163,0.08); border-radius: 16px; box-shadow: 0 10px 30px rgba(12,30,72,0.07); overflow: hidden; }
+    .publish-card { padding: 1.55rem; }
+    .table-scroll { overflow-x: auto; }
     .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    .data-table th { background: rgba(26,63,163,0.05); padding: 0.8rem 1rem; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--blue); font-weight: 700; border-bottom: 2px solid var(--gray-light); }
-    .data-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--gray-light); color: var(--text); vertical-align: top; }
+    .data-table th { background: #f7f9fe; padding: 0.85rem 1rem; text-align: left; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--blue); font-weight: 900; border-bottom: 1px solid var(--gray-light); white-space: nowrap; }
+    .data-table td { padding: 0.9rem 1rem; border-bottom: 1px solid #edf0f7; color: var(--text); vertical-align: top; }
+    .data-table tbody tr:hover { background: #fbfcff; }
     .amount-cell { font-weight: 700; color: #276749; }
-    .method-badge { font-size: 0.75rem; background: var(--gray-light); padding: 0.2rem 0.6rem; border-radius: 6px; }
-    .status-ok { color: #276749; font-weight: 700; }
-    .status-wait { color: var(--gold-dark); font-weight: 700; }
+    .method-badge { font-size: 0.75rem; background: #eef2f8; color: #4a5873; padding: 0.24rem 0.62rem; border-radius: 999px; font-weight: 800; white-space: nowrap; }
+    .status-ok { color: #276749; font-weight: 800; }
+    .status-wait { color: var(--gold-dark); font-weight: 800; }
     .msg-content { max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gray); }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 1rem; }
-    .content-group { border: 1px solid var(--gray-light); border-radius: 14px; padding: 1.2rem; margin-bottom: 1.2rem; background: #fbfcff; }
-    .content-group h4 { color: var(--blue-dark); font-size: 1rem; margin-bottom: 1rem; font-family: 'Playfair Display', serif; }
+    .settings-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .settings-search { max-width: 360px; flex: 1; min-width: 220px; }
+    .settings-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; }
+    .mini-btn { border: 1px solid rgba(26,63,163,0.14); background: #f7f9fe; color: var(--blue-dark); border-radius: 999px; padding: 0.48rem 0.78rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: var(--transition); }
+    .mini-btn:hover { background: #eef4ff; }
+    .content-group { border: 1px solid #e4e9f4; border-radius: 14px; margin-bottom: 0.8rem; background: #fbfcff; overflow: hidden; }
+    .content-group[hidden] { display: none; }
+    .content-group summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--blue-dark); font-weight: 900; font-family: 'Playfair Display', serif; background: linear-gradient(135deg, #ffffff, #f8faff); }
+    .content-group summary::-webkit-details-marker { display: none; }
+    .content-group summary::after { content: "+"; width: 28px; height: 28px; border-radius: 50%; background: #eef4ff; color: var(--blue); display: inline-flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+    .content-group[open] summary::after { content: "-"; }
+    .content-group .form-grid { padding: 1.1rem; }
     textarea.form-control { resize: vertical; }
     .settings-help { color: var(--gray); font-size: 0.86rem; margin-bottom: 1.2rem; line-height: 1.6; }
-    .thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 8px; background: var(--gray-light); }
+    .thumb { width: 84px; height: 58px; object-fit: cover; border-radius: 10px; background: var(--gray-light); box-shadow: 0 5px 14px rgba(12,30,72,0.11); }
     .admin-time { font-size: 0.8rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); padding: 0.3rem 0.8rem; border-radius: 15px; }
-    @media(max-width:1100px) { .dashboard-stats { grid-template-columns: repeat(2,1fr); } }
-    @media(max-width:768px) { .admin-sidebar { display: none; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .admin-time { display: none; } }
+    @media(max-width:1180px) { .dashboard-stats { grid-template-columns: repeat(2,1fr); } .dashboard-hero { align-items: flex-start; flex-direction: column; } .dashboard-actions { justify-content: flex-start; } }
+    @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; border-right: 0; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
   </style>
 </head>
 <body>
@@ -232,27 +296,34 @@ function networkText($network): string {
     <aside class="admin-sidebar">
       <ul class="sidebar-nav">
         <li class="sidebar-section-label">Overview</li>
-        <li><a class="active" href="#overview">Dashboard</a></li>
+        <li><a class="active" href="#overview"><span>O</span>Dashboard</a></li>
         <li class="sidebar-section-label">Donations</li>
-        <li><a href="#donors">Donor Records</a></li>
+        <li><a href="#donors"><span>D</span>Donor Records</a></li>
         <li class="sidebar-section-label">Content</li>
-        <li><a href="#settings">Site Settings</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#publish">Publish Article</a></li>
+        <li><a href="#settings"><span>S</span>Site Settings</a></li>
+        <li><a href="#gallery"><span>G</span>Gallery</a></li>
+        <li><a href="#publish"><span>P</span>Publish Article</a></li>
         <li class="sidebar-section-label">Messages</li>
-        <li><a href="#messages">Messages</a></li>
+        <li><a href="#messages"><span>M</span>Messages</a></li>
         <li class="sidebar-section-label">Account</li>
-        <li><a href="#account">Admin Account</a></li>
+        <li><a href="#account"><span>A</span>Admin Account</a></li>
         <li class="sidebar-section-label">Site</li>
-        <li><a href="../index.html" target="_blank">View Website</a></li>
+        <li><a href="../index.html" target="_blank"><span>V</span>View Website</a></li>
       </ul>
     </aside>
 
     <main class="admin-main">
       <section class="admin-section" id="overview">
-        <div style="margin-bottom:1.5rem">
-          <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--blue-dark)">Welcome back, Admin</h2>
-          <p style="color:var(--gray);font-size:0.9rem">Here is what is happening with TSF today.</p>
+        <div class="dashboard-hero">
+          <div>
+            <h2>Welcome back, Admin</h2>
+            <p>Manage donations, content, gallery items, articles, and site account settings from one place.</p>
+          </div>
+          <div class="dashboard-actions">
+            <a class="action-chip" href="#settings">Edit Site</a>
+            <a class="action-chip secondary" href="#gallery">Manage Gallery</a>
+            <a class="action-chip secondary" href="../index.html" target="_blank">View Website</a>
+          </div>
         </div>
         <div class="dashboard-stats">
           <div class="dash-stat"><div class="dash-stat-icon">D</div><div><div class="dash-stat-num"><?= (int)$summary['total_donors'] ?></div><div class="dash-stat-label">Verified Donors</div></div></div>
@@ -263,8 +334,9 @@ function networkText($network): string {
       </section>
 
       <section class="admin-section" id="donors">
-        <div class="admin-section-header"><h3>Donor Records</h3></div>
+        <div class="admin-section-header"><div><h3>Donor Records</h3><p>Recent donation attempts and verified payment status.</p></div></div>
         <div class="data-table-wrap">
+          <div class="table-scroll">
           <table class="data-table">
             <thead><tr><th>Name</th><th>Email</th><th>Gender</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
             <tbody>
@@ -284,21 +356,29 @@ function networkText($network): string {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
       <section class="admin-section" id="settings">
-        <div class="admin-section-header"><h3>Site Settings</h3></div>
+        <div class="admin-section-header"><div><h3>Site Settings</h3><p>Edit public page copy and contact details without touching code.</p></div></div>
         <div class="publish-card">
           <?php if ($settingsMessage): ?><div class="alert alert-success show"><?= e($settingsMessage) ?></div><?php endif; ?>
           <?php if ($settingsError): ?><div class="alert alert-error show"><?= e($settingsError) ?></div><?php endif; ?>
           <p class="settings-help">Edit public site text, contact details, and social links here. The public pages load these values from the backend, so you do not need to touch code for ordinary content updates.</p>
+          <div class="settings-toolbar">
+            <input class="form-control settings-search" id="settings-search" type="search" placeholder="Search editable fields...">
+            <div class="settings-actions">
+              <button type="button" class="mini-btn" id="expand-settings">Expand all</button>
+              <button type="button" class="mini-btn" id="collapse-settings">Collapse all</button>
+            </div>
+          </div>
           <form method="POST">
             <input type="hidden" name="action" value="save_settings">
             <input type="hidden" name="csrf_token" value="<?= e($csrfSettings) ?>">
             <?php foreach ($contentDefinitions as $groupName => $fields): ?>
-              <div class="content-group">
-                <h4><?= e($groupName) ?></h4>
+              <details class="content-group" open data-group="<?= e(strtolower($groupName)) ?>">
+                <summary><?= e($groupName) ?></summary>
                 <div class="form-grid">
                   <?php foreach ($fields as $key => $field): ?>
                     <div class="form-group">
@@ -311,7 +391,7 @@ function networkText($network): string {
                     </div>
                   <?php endforeach; ?>
                 </div>
-              </div>
+              </details>
             <?php endforeach; ?>
             <button type="submit" class="btn btn-blue btn-lg">Save Site Settings</button>
           </form>
@@ -319,11 +399,11 @@ function networkText($network): string {
       </section>
 
       <section class="admin-section" id="gallery">
-        <div class="admin-section-header"><h3>Gallery Manager</h3></div>
+        <div class="admin-section-header"><div><h3>Gallery Manager</h3><p>Add, order, and remove public gallery images.</p></div></div>
         <div class="publish-card" style="margin-bottom:1.2rem">
           <?php if ($galleryMessage): ?><div class="alert alert-success show"><?= e($galleryMessage) ?></div><?php endif; ?>
           <?php if ($galleryError): ?><div class="alert alert-error show"><?= e($galleryError) ?></div><?php endif; ?>
-          <form method="POST">
+          <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add_gallery">
             <input type="hidden" name="csrf_token" value="<?= e($csrfGallery) ?>">
             <div class="form-grid">
@@ -331,14 +411,17 @@ function networkText($network): string {
               <div class="form-group"><label>Category</label><input class="form-control" name="category" placeholder="Education"></div>
             </div>
             <div class="form-grid-3">
-              <div class="form-group"><label>Image URL or images/ path *</label><input class="form-control" name="image_url" placeholder="https://... or images/photo.jpg"></div>
+              <div class="form-group"><label>Upload Image *</label><input class="form-control" type="file" name="gallery_image" accept="image/jpeg,image/png,image/webp,image/gif"></div>
               <div class="form-group"><label>Caption</label><input class="form-control" name="caption" placeholder="Short description"></div>
               <div class="form-group"><label>Order</label><input class="form-control" type="number" name="display_order" value="0"></div>
             </div>
+            <div class="form-group"><label>Image URL fallback</label><input class="form-control" name="image_url" placeholder="Optional: https://... or images/photo.jpg"></div>
+            <p class="settings-help">Upload a JPG, PNG, WebP, or GIF up to 4MB. Use the URL field only when the image is already hosted elsewhere.</p>
             <button type="submit" class="btn btn-blue">Add Gallery Item</button>
           </form>
         </div>
         <div class="data-table-wrap">
+          <div class="table-scroll">
           <table class="data-table">
             <thead><tr><th>Image</th><th>Title</th><th>Category</th><th>Order</th><th>Action</th></tr></thead>
             <tbody>
@@ -361,11 +444,12 @@ function networkText($network): string {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
       <section class="admin-section" id="publish">
-        <div class="admin-section-header"><h3>Publish Article</h3></div>
+        <div class="admin-section-header"><div><h3>Publish Article</h3><p>Create a news update for the public News page.</p></div></div>
         <div class="publish-card">
           <?php if ($publishMessage): ?><div class="alert alert-success show"><?= e($publishMessage) ?></div><?php endif; ?>
           <?php if ($publishError): ?><div class="alert alert-error show"><?= e($publishError) ?></div><?php endif; ?>
@@ -402,8 +486,9 @@ function networkText($network): string {
       </section>
 
       <section class="admin-section" id="news">
-        <div class="admin-section-header"><h3>Recent Articles</h3></div>
+        <div class="admin-section-header"><div><h3>Recent Articles</h3><p>Latest published updates from the news system.</p></div></div>
         <div class="data-table-wrap">
+          <div class="table-scroll">
           <table class="data-table">
             <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th></tr></thead>
             <tbody>
@@ -413,12 +498,14 @@ function networkText($network): string {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
       <section class="admin-section" id="messages">
-        <div class="admin-section-header"><h3>Messages & Enquiries</h3></div>
+        <div class="admin-section-header"><div><h3>Messages & Enquiries</h3><p>Contact form and floating message submissions.</p></div></div>
         <div class="data-table-wrap">
+          <div class="table-scroll">
           <table class="data-table">
             <thead><tr><th>Name</th><th>Email</th><th>Subject / Type</th><th>Message</th><th>Date</th></tr></thead>
             <tbody>
@@ -428,11 +515,12 @@ function networkText($network): string {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
       <section class="admin-section" id="account">
-        <div class="admin-section-header"><h3>Admin Account & Recovery Email</h3></div>
+        <div class="admin-section-header"><div><h3>Admin Account & Recovery Email</h3><p>Keep the account name and recovery email current.</p></div></div>
         <div class="publish-card">
           <?php if ($accountMessage): ?><div class="alert alert-success show"><?= e($accountMessage) ?></div><?php endif; ?>
           <?php if ($accountError): ?><div class="alert alert-error show"><?= e($accountError) ?></div><?php endif; ?>
@@ -460,6 +548,52 @@ function networkText($network): string {
     }
     setInterval(updateAdminTime, 1000);
     updateAdminTime();
+
+    const navLinks = Array.from(document.querySelectorAll('.sidebar-nav a[href^="#"]'));
+    const sections = navLinks
+      .map(link => document.querySelector(link.getAttribute('href')))
+      .filter(Boolean);
+
+    function setActiveNav() {
+      let activeId = 'overview';
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 130) activeId = section.id;
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${activeId}`);
+      });
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.forEach(item => item.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+    window.addEventListener('scroll', setActiveNav, { passive: true });
+    setActiveNav();
+
+    const search = document.getElementById('settings-search');
+    const groups = Array.from(document.querySelectorAll('.content-group'));
+    if (search) {
+      search.addEventListener('input', () => {
+        const query = search.value.trim().toLowerCase();
+        groups.forEach(group => {
+          const match = group.textContent.toLowerCase().includes(query);
+          group.hidden = query !== '' && !match;
+          if (query && match) group.open = true;
+        });
+      });
+    }
+
+    document.getElementById('expand-settings')?.addEventListener('click', () => {
+      groups.forEach(group => { group.hidden = false; group.open = true; });
+      if (search) search.value = '';
+    });
+    document.getElementById('collapse-settings')?.addEventListener('click', () => {
+      groups.forEach(group => { group.open = false; });
+    });
   </script>
 </body>
 </html>

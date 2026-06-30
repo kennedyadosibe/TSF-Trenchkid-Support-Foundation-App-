@@ -33,5 +33,11 @@ The admin dashboard now controls editable public site content through shared sit
 
 ## Notes
 
-Gallery photos and news articles are managed separately from the page copy. Password recovery email delivery still depends on XAMPP/PHP mail or SMTP configuration.
+Gallery photos and news articles are managed separately from the page copy. Gallery items can be added with direct image uploads, with URL entry kept only as a fallback. Password recovery email delivery still depends on XAMPP/PHP mail or SMTP configuration.
 
+## Gallery Uploads
+
+- Upload folder: `images/gallery/`
+- Accepted formats: JPG, PNG, WebP, GIF
+- Maximum file size: 4MB
+- The admin dashboard stores the uploaded relative path in the existing `gallery.image_url` field.
