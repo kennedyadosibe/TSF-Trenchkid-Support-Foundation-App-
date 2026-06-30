@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS donors (
     id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     first_name   VARCHAR(100) NOT NULL,
     last_name    VARCHAR(100) NOT NULL,
-    email        VARCHAR(180) NOT NULL,
+    email        VARCHAR(180) DEFAULT NULL,
     phone        VARCHAR(20) DEFAULT NULL,
     gender       ENUM('Male','Female','Prefer not to say') DEFAULT NULL,
     amount       DECIMAL(12, 2) NOT NULL,
@@ -48,6 +48,23 @@ CREATE TABLE IF NOT EXISTS donors (
     INDEX idx_email (email),
     INDEX idx_created (created_at),
     UNIQUE KEY uniq_transaction_ref (transaction_ref)
+) ENGINE=InnoDB;
+
+-- ============================================
+-- SMS NOTIFICATIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS sms_notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    donor_id BIGINT UNSIGNED DEFAULT NULL,
+    phone VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('queued','sent','failed') DEFAULT 'queued',
+    provider_response TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sent_at DATETIME DEFAULT NULL,
+    FOREIGN KEY (donor_id) REFERENCES donors(id) ON DELETE SET NULL,
+    INDEX idx_phone (phone),
+    INDEX idx_status_created (status, created_at)
 ) ENGINE=InnoDB;
 
 

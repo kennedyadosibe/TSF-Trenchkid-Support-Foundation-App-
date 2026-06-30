@@ -30,9 +30,10 @@ $reference = 'TSF_' . date('YmdHis') . '_' . bin2hex(random_bytes(4));
 $channels = $donation['payment_method'] === 'mobile_money'
     ? ['mobile_money']
     : ['card'];
+$checkoutEmail = $donation['email'] ?: 'donor+' . strtolower($reference) . '@tsfghana.org';
 
 $payload = [
-    'email' => $donation['email'],
+    'email' => $checkoutEmail,
     'amount' => (int) round($donation['amount'] * 100),
     'currency' => 'GHS',
     'reference' => $reference,
@@ -41,6 +42,7 @@ $payload = [
     'metadata' => [
         'first_name' => $donation['first_name'],
         'last_name' => $donation['last_name'],
+        'email' => $donation['email'],
         'phone' => $donation['phone'],
         'gender' => $donation['gender'],
         'payment_method' => $donation['payment_method'],

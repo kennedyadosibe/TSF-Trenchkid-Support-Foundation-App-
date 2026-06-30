@@ -24,21 +24,22 @@ if (!validateCsrfToken($csrfToken, 'donate')) {
 }
 
 // ---- SANITIZE & VALIDATE ----
-$firstName = sanitize($input['first_name'] ?? '');
-$lastName  = sanitize($input['last_name']  ?? '');
-$email     = filter_var(trim($input['email'] ?? ''), FILTER_VALIDATE_EMAIL);
-$phone     = sanitize($input['phone'] ?? '');
-$gender    = sanitize($input['gender'] ?? '');
+$firstName = trim(strip_tags((string)($input['first_name'] ?? '')));
+$lastName  = trim(strip_tags((string)($input['last_name']  ?? '')));
+$rawEmail  = trim($input['email'] ?? '');
+$email     = $rawEmail === '' ? '' : filter_var($rawEmail, FILTER_VALIDATE_EMAIL);
+$phone     = trim(strip_tags((string)($input['phone'] ?? '')));
+$gender    = trim(strip_tags((string)($input['gender'] ?? '')));
 $amount    = filter_var($input['amount'] ?? 0, FILTER_VALIDATE_FLOAT);
-$method    = sanitize($input['payment_method'] ?? '');
-$network   = sanitize($input['mobile_network'] ?? '');
-$txRef     = sanitize($input['transaction_ref'] ?? ''); // From client-side payment SDK
+$method    = trim(strip_tags((string)($input['payment_method'] ?? '')));
+$network   = trim(strip_tags((string)($input['mobile_network'] ?? '')));
+$txRef     = trim(strip_tags((string)($input['transaction_ref'] ?? ''))); // From client-side payment SDK
 
 $errors = [];
 
 if (empty($firstName)) $errors[] = 'First name is required.';
 if (empty($lastName))  $errors[] = 'Last name is required.';
-if (!$email)           $errors[] = 'A valid email address is required.';
+if ($rawEmail !== '' && !$email) $errors[] = 'Enter a valid email address or leave it blank.';
 if ($amount === false || $amount <= 0) $errors[] = 'A valid donation amount is required.';
 if (!in_array($method, ['mobile_money', 'card'])) $errors[] = 'Invalid payment method.';
 if ($method === 'mobile_money' && !in_array($network, ['mtn', 'telecel', 'airteltigo'])) $errors[] = 'Please select MTN, Telecel, or AirtelTigo.';
@@ -99,7 +100,7 @@ try {
     $stmt->execute([
         $firstName,
         $lastName,
-        $email,
+        $email ?: null,
         $phone ?: null,
         $gender ?: null,
         $amount,
@@ -111,8 +112,8 @@ try {
 
     $donorId = $pdo->lastInsertId();
 
-    // Send thank-you email
     sendThankYouEmail($email, $firstName, $amount, $method);
+    queueThankYouSms((int)$donorId, $phone ?: null, $firstName, $amount);
 
     jsonResponse(true, 'Donation recorded successfully. Thank you for your generous support!', [
         'donor_id'         => (int) $donorId,
@@ -158,8 +159,12 @@ function verifyPaystackPayment(string $txRef, float $expectedAmount): bool {
     return verifyMobileMoneyPayment($txRef, $expectedAmount, 'card');
 }
 
-function sendThankYouEmail(string $email, string $name, float $amount, string $method): void {
-    $subject = 'Thank You for Your Generous Support — TSF';
+function sendThankYouEmail(?string $email, string $name, float $amount, string $method): void {
+    if (!$email) {
+        return;
+    }
+
+    $subject = 'Thank You for Your Generous Support - TSF';
     $methodLabels = [
         'mobile_money' => 'Mobile Money',
         'card' => 'Visa/Mastercard',
@@ -183,4 +188,22 @@ function sendThankYouEmail(string $email, string $name, float $amount, string $m
              . "X-Mailer: PHP/" . phpversion();
 
     @mail($email, $subject, $body, $headers);
+}
+
+function queueThankYouSms(int $donorId, ?string $phone, string $name, float $amount): void {
+    if (!$phone) {
+        return;
+    }
+
+    $message = "Dear $name, thank you for supporting TSF with GHS " . number_format($amount, 2) . ". Your donation is making a real difference in a child's life.";
+    try {
+        $pdo = getDB();
+        $stmt = $pdo->prepare(
+            'INSERT INTO sms_notifications (donor_id, phone, message, status, provider_response)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$donorId, $phone, $message, 'queued', 'SMS provider is not configured. Message recorded for follow-up.']);
+    } catch (PDOException $e) {
+        error_log('SMS notice log error: ' . $e->getMessage());
+    }
 }

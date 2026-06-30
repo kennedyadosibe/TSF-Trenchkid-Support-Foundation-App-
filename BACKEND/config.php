@@ -34,6 +34,13 @@ define('PAYSTACK_SECRET_KEY', 'sk_test_d68cbc225843eda55191d6d8f6b9230ced01f15f'
 define('PAYSTACK_PUBLIC_KEY', 'pk_test_xxxxxxxxxxxxxxxxxxxx');
 define('PAYSTACK_CALLBACK_URL', SITE_URL . '/donate.html');
 
+// ---- SMS ----
+// Add your SMS provider endpoint and API key here to send donor thank-you texts.
+// When these are empty, TSF stores the SMS message in the database for follow-up.
+define('SMS_API_URL', '');
+define('SMS_API_KEY', '');
+define('SMS_SENDER_ID', 'TSF');
+
 // ---- EMAIL ----
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);

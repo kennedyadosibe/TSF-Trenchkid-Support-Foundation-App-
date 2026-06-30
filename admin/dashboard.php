@@ -27,6 +27,10 @@ $contentTypes = [
     'faq' => 'FAQ',
 ];
 
+function cleanText($value): string {
+    return trim(strip_tags((string)$value));
+}
+
 function uploadManagedImage(array $uploaded, string $folder, string $title, string &$error): string {
     if (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
         return '';
@@ -57,10 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publi
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'publish')) {
         $publishError = 'Security validation failed. Please try again.';
     } else {
-        $title = sanitize($_POST['title'] ?? '');
+        $title = cleanText($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
-        $category = sanitize($_POST['category'] ?? 'General');
-        $author = sanitize($_POST['author'] ?? ($_SESSION['admin_name'] ?? 'TSF Admin'));
+        $category = cleanText($_POST['category'] ?? 'General');
+        $author = cleanText($_POST['author'] ?? ($_SESSION['admin_name'] ?? 'TSF Admin'));
         $featured = !empty($_POST['is_featured']) ? 1 : 0;
         $allowed = ['Education','Digital Skills','Health','Community','Partnership','Announcement','General'];
         if (!in_array($category, $allowed, true)) $category = 'General';
@@ -123,10 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_g
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'gallery')) {
         $galleryError = 'Security validation failed. Please try again.';
     } else {
-        $title = sanitize($_POST['title'] ?? '');
+        $title = cleanText($_POST['title'] ?? '');
         $imageUrl = trim($_POST['image_url'] ?? '');
         $caption = trim($_POST['caption'] ?? '');
-        $category = sanitize($_POST['category'] ?? 'General');
+        $category = cleanText($_POST['category'] ?? 'General');
         $order = (int)($_POST['display_order'] ?? 0);
         $uploaded = $_FILES['gallery_image'] ?? null;
         $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
@@ -153,9 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
         $galleryError = 'Security validation failed. Please try again.';
     } else {
         $galleryId = (int)($_POST['gallery_id'] ?? 0);
-        $title = sanitize($_POST['title'] ?? '');
+        $title = cleanText($_POST['title'] ?? '');
         $caption = trim($_POST['caption'] ?? '');
-        $category = sanitize($_POST['category'] ?? 'General');
+        $category = cleanText($_POST['category'] ?? 'General');
         $order = (int)($_POST['display_order'] ?? 0);
         $imageUrl = trim($_POST['image_url'] ?? '');
         $uploaded = $_FILES['gallery_image'] ?? null;
@@ -191,10 +195,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
         $contentError = 'Security validation failed. Please try again.';
     } else {
         $itemType = $_POST['item_type'] ?? '';
-        $title = sanitize($_POST['title'] ?? '');
-        $subtitle = sanitize($_POST['subtitle'] ?? '');
+        $title = cleanText($_POST['title'] ?? '');
+        $subtitle = cleanText($_POST['subtitle'] ?? '');
         $body = trim($_POST['body'] ?? '');
-        $metaValue = sanitize($_POST['meta_value'] ?? '');
+        $metaValue = cleanText($_POST['meta_value'] ?? '');
         $imageUrl = trim($_POST['image_url'] ?? '');
         $order = (int)($_POST['display_order'] ?? 0);
         $uploaded = $_FILES['content_image'] ?? null;
@@ -223,10 +227,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     } else {
         $itemId = (int)($_POST['content_item_id'] ?? 0);
         $itemType = $_POST['item_type'] ?? '';
-        $title = sanitize($_POST['title'] ?? '');
-        $subtitle = sanitize($_POST['subtitle'] ?? '');
+        $title = cleanText($_POST['title'] ?? '');
+        $subtitle = cleanText($_POST['subtitle'] ?? '');
         $body = trim($_POST['body'] ?? '');
-        $metaValue = sanitize($_POST['meta_value'] ?? '');
+        $metaValue = cleanText($_POST['meta_value'] ?? '');
         $imageUrl = trim($_POST['image_url'] ?? '');
         $order = (int)($_POST['display_order'] ?? 0);
         $uploaded = $_FILES['content_image'] ?? null;
@@ -262,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
         $accountError = 'Security validation failed. Please try again.';
     } else {
         $email = filter_var(trim($_POST['admin_email'] ?? ''), FILTER_VALIDATE_EMAIL);
-        $name = sanitize($_POST['admin_name'] ?? '');
+        $name = cleanText($_POST['admin_name'] ?? '');
         if (!$email) {
             $accountError = 'Enter a valid recovery email.';
         } else {
@@ -898,6 +902,24 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
         button.classList.add('active');
         contentRows.forEach(row => {
           row.style.display = type === 'all' || row.dataset.contentType === type ? '' : 'none';
+        });
+      });
+    });
+
+    document.querySelectorAll('form[id^="content-item-"], form[id^="gallery-item-"]').forEach(form => {
+      form.addEventListener('submit', () => {
+        document.querySelectorAll(`[form="${form.id}"]`).forEach(control => {
+          if (!control.name || control.type === 'file') return;
+          let hidden = Array.from(form.querySelectorAll('input[type="hidden"][data-row-copy]'))
+            .find(input => input.dataset.rowCopy === control.name);
+          if (!hidden) {
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = control.name;
+            hidden.dataset.rowCopy = control.name;
+            form.appendChild(hidden);
+          }
+          hidden.value = control.value;
         });
       });
     });

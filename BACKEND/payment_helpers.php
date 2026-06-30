@@ -13,22 +13,27 @@ function normalizePhone(string $phone): string {
     return preg_replace('/\s+/', '', trim($phone));
 }
 
+function cleanDonationText($value): string {
+    return trim(strip_tags((string)$value));
+}
+
 function validateDonationInput(array $input, bool $requirePhone = false): array {
+    $email = trim($input['email'] ?? '');
     $data = [
-        'first_name' => sanitize($input['first_name'] ?? ''),
-        'last_name' => sanitize($input['last_name'] ?? ''),
-        'email' => filter_var(trim($input['email'] ?? ''), FILTER_VALIDATE_EMAIL),
+        'first_name' => cleanDonationText($input['first_name'] ?? ''),
+        'last_name' => cleanDonationText($input['last_name'] ?? ''),
+        'email' => $email === '' ? '' : filter_var($email, FILTER_VALIDATE_EMAIL),
         'phone' => normalizePhone($input['phone'] ?? ''),
-        'gender' => sanitize($input['gender'] ?? ''),
+        'gender' => cleanDonationText($input['gender'] ?? ''),
         'amount' => filter_var($input['amount'] ?? 0, FILTER_VALIDATE_FLOAT),
-        'payment_method' => sanitize($input['payment_method'] ?? ''),
-        'mobile_network' => sanitize($input['mobile_network'] ?? ''),
+        'payment_method' => cleanDonationText($input['payment_method'] ?? ''),
+        'mobile_network' => cleanDonationText($input['mobile_network'] ?? ''),
     ];
 
     $errors = [];
     if ($data['first_name'] === '') $errors[] = 'First name is required.';
     if ($data['last_name'] === '') $errors[] = 'Last name is required.';
-    if (!$data['email']) $errors[] = 'A valid email address is required.';
+    if ($email !== '' && !$data['email']) $errors[] = 'Enter a valid email address or leave it blank.';
     if ($data['amount'] === false || $data['amount'] <= 0) $errors[] = 'A valid donation amount is required.';
     if (!in_array($data['payment_method'], ['mobile_money', 'card'], true)) $errors[] = 'Invalid payment method.';
     if (!in_array($data['gender'], ['Male', 'Female', 'Prefer not to say', ''], true)) $errors[] = 'Invalid gender value.';
@@ -108,7 +113,7 @@ function donationFromPaystackMetadata(array $tx): array {
     return [
         'first_name' => $metadata['first_name'] ?? '',
         'last_name' => $metadata['last_name'] ?? '',
-        'email' => $tx['customer']['email'] ?? ($tx['email'] ?? ''),
+        'email' => $metadata['email'] ?? '',
         'phone' => $metadata['phone'] ?? '',
         'gender' => $metadata['gender'] ?? '',
         'amount' => $amount,
@@ -138,7 +143,7 @@ function recordVerifiedDonation(array $donation, string $reference): array {
     $stmt->execute([
         $donation['first_name'],
         $donation['last_name'],
-        $donation['email'],
+        $donation['email'] ?: null,
         $donation['phone'] ?: null,
         $donation['gender'] ?: null,
         $donation['amount'],
@@ -149,12 +154,14 @@ function recordVerifiedDonation(array $donation, string $reference): array {
 
     $donorId = (int)$pdo->lastInsertId();
     sendThankYouEmail($donation['email'], $donation['first_name'], (float)$donation['amount'], $donation['payment_method']);
+    $smsNotice = sendThankYouSms($donorId, $donation['phone'], $donation['first_name'], (float)$donation['amount'], $donation['payment_method']);
 
     return [
         'donor_id' => $donorId,
         'first_name' => $donation['first_name'],
         'amount' => number_format((float)$donation['amount'], 2),
         'already_recorded' => false,
+        'sms_notice' => $smsNotice,
     ];
 }
 
@@ -173,7 +180,11 @@ function networkLabel(?string $network): string {
     ][$network ?? ''] ?? '';
 }
 
-function sendThankYouEmail(string $email, string $name, float $amount, string $method): void {
+function sendThankYouEmail(?string $email, string $name, float $amount, string $method): void {
+    if (!$email) {
+        return;
+    }
+
     $subject = 'Thank You for Your Generous Support - TSF';
     $date = date('d M Y, h:i A');
     $body = "Dear $name,\n\n"
@@ -192,4 +203,65 @@ function sendThankYouEmail(string $email, string $name, float $amount, string $m
              . "X-Mailer: PHP/" . phpversion();
 
     @mail($email, $subject, $body, $headers);
+}
+
+function sendThankYouSms(int $donorId, ?string $phone, string $name, float $amount, string $method): array {
+    if (!$phone) {
+        return ['status' => 'skipped', 'message' => 'No phone number provided.'];
+    }
+
+    $message = "Dear $name, thank you for supporting TSF with GHS " . number_format($amount, 2) . ". Your donation is making a real difference in a child's life.";
+    $status = 'queued';
+    $providerResponse = 'SMS provider is not configured. Message recorded for follow-up.';
+
+    if (defined('SMS_API_URL') && SMS_API_URL !== '' && defined('SMS_API_KEY') && SMS_API_KEY !== '') {
+        $payload = json_encode([
+            'to' => $phone,
+            'from' => defined('SMS_SENDER_ID') && SMS_SENDER_ID !== '' ? SMS_SENDER_ID : 'TSF',
+            'message' => $message,
+        ]);
+        $ch = curl_init(SMS_API_URL);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . SMS_API_KEY,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_TIMEOUT => 20,
+        ]);
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response !== false && $httpCode >= 200 && $httpCode < 300) {
+            $status = 'sent';
+            $providerResponse = $response;
+        } else {
+            $status = 'failed';
+            $providerResponse = $error ?: ($response ?: 'SMS provider returned HTTP ' . $httpCode);
+        }
+    }
+
+    try {
+        $pdo = getDB();
+        $stmt = $pdo->prepare(
+            'INSERT INTO sms_notifications (donor_id, phone, message, status, provider_response, sent_at)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $donorId,
+            $phone,
+            $message,
+            $status,
+            $providerResponse,
+            $status === 'sent' ? date('Y-m-d H:i:s') : null,
+        ]);
+    } catch (PDOException $e) {
+        error_log('SMS notice log error: ' . $e->getMessage());
+    }
+
+    return ['status' => $status, 'message' => $message];
 }

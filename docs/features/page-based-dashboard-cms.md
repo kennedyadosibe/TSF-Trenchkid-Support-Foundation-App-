@@ -35,6 +35,8 @@ The manager includes filters so admins can view one content type at a time.
 
 Existing page items can be edited directly from the table. Admins can change names, roles, descriptions, ordering, initials/stat values, URLs, and upload a replacement image without deleting the item.
 
+Row save buttons copy the edited table values into the submitted form before posting, so inline edits for team credentials and other page items save reliably.
+
 These records are stored in `content_items` and loaded on public pages through `BACKEND/content_items.php`.
 
 ## Uploads

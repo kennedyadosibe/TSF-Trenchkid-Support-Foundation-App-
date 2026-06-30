@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const Validate = {
   required(val) { return val.trim().length > 0; },
   email(val) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim()); },
+  emailOptional(val) { return val.trim() === '' || this.email(val); },
   ghPhone(val) {
     const v = val.trim();
     return /^0[0-9]{9}$/.test(v) || /^\+233[0-9]{9}$/.test(v);
@@ -52,7 +53,7 @@ function validateDonateForm() {
   const fields = {
     fname: { el: document.getElementById('d-fname'), err: document.getElementById('d-fname-err'), rules: ['required'], msgs: ['First name is required.'] },
     lname: { el: document.getElementById('d-lname'), err: document.getElementById('d-lname-err'), rules: ['required'], msgs: ['Last name is required.'] },
-    email: { el: document.getElementById('d-email'), err: document.getElementById('d-email-err'), rules: ['required','email'], msgs: ['Email is required.', 'Enter a valid email address.'] },
+    email: { el: document.getElementById('d-email'), err: document.getElementById('d-email-err'), rules: ['emailOptional'], msgs: ['Enter a valid email address or leave it blank.'] },
     amount: { el: document.getElementById('d-amount'), err: document.getElementById('d-amount-err'), rules: ['required'], msgs: ['Please enter a donation amount.'] },
     gender: { el: document.getElementById('d-gender'), err: document.getElementById('d-gender-err'), rules: ['required'], msgs: ['Please select your gender.'] },
   };

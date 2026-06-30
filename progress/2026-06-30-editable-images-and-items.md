@@ -12,6 +12,8 @@ Date: 2026-06-30
 - Connected public page hero sections to admin-managed image settings.
 - Kept remove actions available beside save actions.
 - Verified dashboard renders the editable rows and upload fields after login.
+- Added a row-save compatibility helper so inline edits submit all edited values reliably.
+- Fixed admin content storage so text is saved cleanly and escaped only during display.
 
 ## Notes
 
