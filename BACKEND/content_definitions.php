@@ -12,6 +12,7 @@ function getContentDefinitions(): array {
             'mission_statement' => ['label' => 'Mission Statement', 'type' => 'textarea', 'default' => 'Trenchkid Support Foundation exists to empower underprivileged children with education, digital skills, and mentorship, enabling them to build independent and impactful futures.'],
         ],
         'Home Page' => [
+            'home_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'home_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Every Child Deserves a Bright Future'],
             'home_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Trenchkid Support Foundation bridges the gap between poverty and opportunity - providing education, digital skills, and mentorship to underprivileged children across Ghana.'],
             'home_intro_title' => ['label' => 'Intro Title', 'type' => 'text', 'default' => 'Breaking Cycles, Building Futures'],
@@ -23,6 +24,7 @@ function getContentDefinitions(): array {
             'home_cta_body' => ['label' => 'CTA Text', 'type' => 'textarea', 'default' => "Your donation - no matter the size - directly funds education, health care, and mentorship for Ghana's underprivileged children. Every cedi counts."],
         ],
         'About Page' => [
+            'about_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'about_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'About TSF'],
             'about_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => "Learn our story, our mission, and the values that drive everything we do for Ghana's underprivileged children."],
             'about_story_title' => ['label' => 'Story Title', 'type' => 'text', 'default' => 'Founded on Hope & Purpose'],
@@ -35,6 +37,7 @@ function getContentDefinitions(): array {
             'about_cta_body' => ['label' => 'CTA Text', 'type' => 'textarea', 'default' => 'Your donation today writes the next chapter for a child in need. Together, we can ensure no talent goes wasted.'],
         ],
         'Impact Page' => [
+            'impact_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'impact_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Our Impact'],
             'impact_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Numbers tell part of the story. But behind every number is a child whose life has been transformed.'],
             'impact_numbers_title' => ['label' => 'Numbers Title', 'type' => 'text', 'default' => 'TSF in Numbers'],
@@ -46,6 +49,7 @@ function getContentDefinitions(): array {
             'impact_reach_body' => ['label' => 'Reach Text', 'type' => 'textarea', 'default' => 'What started in Bolga has grown into a nationwide movement. TSF now operates across multiple regions of Ghana, partnering with local communities, schools, and organisations.'],
         ],
         'Team Page' => [
+            'team_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'team_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Our Team'],
             'team_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => "Meet the passionate individuals who dedicate their time and talent to empowering Ghana's children."],
             'team_leadership_title' => ['label' => 'Leadership Title', 'type' => 'text', 'default' => 'The People Behind TSF'],
@@ -56,11 +60,13 @@ function getContentDefinitions(): array {
             'team_cta_body' => ['label' => 'CTA Text', 'type' => 'textarea', 'default' => 'Are you passionate about empowering children and building futures? TSF is always looking for dedicated volunteers, mentors, and partners to join our movement.'],
         ],
         'News Page' => [
+            'news_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'news_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'News & Articles'],
             'news_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Stay updated with the latest stories, updates, and announcements from Trenchkid Support Foundation.'],
             'news_sidebar_cta' => ['label' => 'Sidebar Donation Text', 'type' => 'textarea', 'default' => "Every story you read represents a real child's life. Help us write more stories like these."],
         ],
         'Donate Page' => [
+            'donate_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'donate_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Make a Donation'],
             'donate_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Your generosity transforms lives. Every donation goes directly to supporting underprivileged children in Ghana.'],
             'donate_form_title' => ['label' => 'Form Title', 'type' => 'text', 'default' => 'Your Donation Details'],
@@ -69,6 +75,7 @@ function getContentDefinitions(): array {
             'donate_thanks_body' => ['label' => 'Thank You Message', 'type' => 'textarea', 'default' => "You'll receive a confirmation email shortly. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana."],
         ],
         'Contact Page' => [
+            'contact_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'contact_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Get in Touch'],
             'contact_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => "Whether you want to donate, volunteer, partner, or simply learn more - we'd love to hear from you."],
             'contact_form_title' => ['label' => 'Form Title', 'type' => 'text', 'default' => 'Send Us a Message'],
@@ -81,6 +88,7 @@ function getContentDefinitions(): array {
             'contact_volunteer_body' => ['label' => 'Volunteer Card Text', 'type' => 'textarea', 'default' => 'TSF welcomes mentors, educators, developers, healthcare workers, and anyone who shares our passion for empowering children. Select "Volunteer" above and tell us your skills!'],
         ],
         'Gallery Page' => [
+            'gallery_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'gallery_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Gallery'],
             'gallery_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Moments from TSF programs, outreach, mentorship, and community support work.'],
             'gallery_section_title' => ['label' => 'Section Title', 'type' => 'text', 'default' => 'TSF Gallery'],

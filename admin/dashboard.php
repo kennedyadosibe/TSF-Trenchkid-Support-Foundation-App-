@@ -27,6 +27,32 @@ $contentTypes = [
     'faq' => 'FAQ',
 ];
 
+function uploadManagedImage(array $uploaded, string $folder, string $title, string &$error): string {
+    if (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return '';
+    }
+    if (($uploaded['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK || (($uploaded['size'] ?? 0) > 4 * 1024 * 1024)) {
+        $error = 'Upload a valid image up to 4MB.';
+        return '';
+    }
+    $tmpPath = $uploaded['tmp_name'] ?? '';
+    $imageInfo = $tmpPath ? @getimagesize($tmpPath) : false;
+    $allowedTypes = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp', IMAGETYPE_GIF => 'gif'];
+    if (!$imageInfo || !isset($allowedTypes[$imageInfo[2]])) {
+        $error = 'Upload a valid JPG, PNG, WebP, or GIF image.';
+        return '';
+    }
+    $uploadDir = dirname(__DIR__) . '/images/' . $folder;
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+    $slugBase = trim(strtolower(preg_replace('/[^a-z0-9]+/', '-', $title)), '-') ?: $folder;
+    $filename = $slugBase . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $allowedTypes[$imageInfo[2]];
+    if (!move_uploaded_file($tmpPath, $uploadDir . '/' . $filename)) {
+        $error = 'Could not save the uploaded image.';
+        return '';
+    }
+    return 'images/' . $folder . '/' . $filename;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publish_article') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'publish')) {
         $publishError = 'Security validation failed. Please try again.';
@@ -71,9 +97,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
         }
         $stmt = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
         foreach ($postedKeys as $key) {
-            $stmt->execute([$key, trim($_POST[$key] ?? '')]);
+            $value = trim($_POST[$key] ?? '');
+            if (isset($_FILES['setting_upload']['name'][$key]) && ($_FILES['setting_upload']['error'][$key] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                $settingUpload = [
+                    'name' => $_FILES['setting_upload']['name'][$key],
+                    'type' => $_FILES['setting_upload']['type'][$key],
+                    'tmp_name' => $_FILES['setting_upload']['tmp_name'][$key],
+                    'error' => $_FILES['setting_upload']['error'][$key],
+                    'size' => $_FILES['setting_upload']['size'][$key],
+                ];
+                $uploadedPath = uploadManagedImage($settingUpload, 'page', $key, $settingsError);
+                if ($uploadedPath !== '') {
+                    $value = $uploadedPath;
+                }
+            }
+            if ($settingsError !== '') break;
+            $stmt->execute([$key, $value]);
         }
-        $settingsMessage = 'Site content updated successfully.';
+        if ($settingsError === '') $settingsMessage = 'Site content updated successfully.';
         $activePanel = sectionIdForSettingKey($postedKeys[0] ?? '', $contentDefinitions);
     }
 }
@@ -90,39 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_g
         $uploaded = $_FILES['gallery_image'] ?? null;
         $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
 
-        if ($hasUpload) {
-            if (($uploaded['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-                $galleryError = 'Image upload failed. Please choose another file.';
-            } elseif (($uploaded['size'] ?? 0) > 4 * 1024 * 1024) {
-                $galleryError = 'Gallery image must be 4MB or smaller.';
-            } else {
-                $tmpPath = $uploaded['tmp_name'] ?? '';
-                $imageInfo = $tmpPath ? @getimagesize($tmpPath) : false;
-                $allowedTypes = [
-                    IMAGETYPE_JPEG => 'jpg',
-                    IMAGETYPE_PNG => 'png',
-                    IMAGETYPE_WEBP => 'webp',
-                    IMAGETYPE_GIF => 'gif',
-                ];
-                if (!$imageInfo || !isset($allowedTypes[$imageInfo[2]])) {
-                    $galleryError = 'Upload a valid JPG, PNG, WebP, or GIF image.';
-                } else {
-                    $uploadDir = dirname(__DIR__) . '/images/gallery';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-                    $slugBase = strtolower(preg_replace('/[^a-z0-9]+/', '-', $title ?: 'gallery'));
-                    $slugBase = trim($slugBase, '-') ?: 'gallery';
-                    $filename = $slugBase . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $allowedTypes[$imageInfo[2]];
-                    $targetPath = $uploadDir . '/' . $filename;
-                    if (!move_uploaded_file($tmpPath, $targetPath)) {
-                        $galleryError = 'Could not save the uploaded image.';
-                    } else {
-                        $imageUrl = 'images/gallery/' . $filename;
-                    }
-                }
-            }
-        }
+        if ($hasUpload) $imageUrl = uploadManagedImage($uploaded, 'gallery', $title, $galleryError);
 
         if ($title === '' || $imageUrl === '') {
             $galleryError = $galleryError ?: 'Gallery title and an uploaded image or image URL are required.';
@@ -134,6 +143,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_g
             $stmt = $pdo->prepare('INSERT INTO gallery (title, caption, image_url, category, display_order, is_active) VALUES (?, ?, ?, ?, ?, 1)');
             $stmt->execute([$title, $caption, $imageUrl, $category ?: 'General', $order]);
             $galleryMessage = 'Gallery item added.';
+            $activePanel = 'gallery';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_gallery') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'gallery')) {
+        $galleryError = 'Security validation failed. Please try again.';
+    } else {
+        $galleryId = (int)($_POST['gallery_id'] ?? 0);
+        $title = sanitize($_POST['title'] ?? '');
+        $caption = trim($_POST['caption'] ?? '');
+        $category = sanitize($_POST['category'] ?? 'General');
+        $order = (int)($_POST['display_order'] ?? 0);
+        $imageUrl = trim($_POST['image_url'] ?? '');
+        $uploaded = $_FILES['gallery_image'] ?? null;
+        $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
+        if ($hasUpload) $imageUrl = uploadManagedImage($uploaded, 'gallery', $title, $galleryError);
+        if ($galleryId <= 0 || $title === '' || $imageUrl === '') {
+            $galleryError = $galleryError ?: 'Title and image are required.';
+        } elseif ($galleryError === '' && !filter_var($imageUrl, FILTER_VALIDATE_URL) && !preg_match('/^images\\//', $imageUrl)) {
+            $galleryError = 'Use an uploaded image, a valid image URL, or an images/ path.';
+        }
+        if ($galleryError === '') {
+            $stmt = $pdo->prepare('UPDATE gallery SET title = ?, caption = ?, image_url = ?, category = ?, display_order = ? WHERE id = ?');
+            $stmt->execute([$title, $caption, $imageUrl, $category ?: 'General', $order, $galleryId]);
+            $galleryMessage = 'Gallery item updated.';
             $activePanel = 'gallery';
         }
     }
@@ -170,33 +206,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
             $contentError = 'Title is required.';
         }
 
-        if ($contentError === '' && $hasUpload) {
-            if (($uploaded['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK || (($uploaded['size'] ?? 0) > 4 * 1024 * 1024)) {
-                $contentError = 'Upload a valid image up to 4MB.';
-            } else {
-                $tmpPath = $uploaded['tmp_name'] ?? '';
-                $imageInfo = $tmpPath ? @getimagesize($tmpPath) : false;
-                $allowedTypes = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp', IMAGETYPE_GIF => 'gif'];
-                if (!$imageInfo || !isset($allowedTypes[$imageInfo[2]])) {
-                    $contentError = 'Upload a valid JPG, PNG, WebP, or GIF image.';
-                } else {
-                    $uploadDir = dirname(__DIR__) . '/images/content';
-                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                    $slugBase = trim(strtolower(preg_replace('/[^a-z0-9]+/', '-', $title)), '-') ?: 'content';
-                    $filename = $slugBase . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $allowedTypes[$imageInfo[2]];
-                    if (!move_uploaded_file($tmpPath, $uploadDir . '/' . $filename)) {
-                        $contentError = 'Could not save the uploaded image.';
-                    } else {
-                        $imageUrl = 'images/content/' . $filename;
-                    }
-                }
-            }
-        }
+        if ($contentError === '' && $hasUpload) $imageUrl = uploadManagedImage($uploaded, 'content', $title, $contentError);
 
         if ($contentError === '') {
             $stmt = $pdo->prepare('INSERT INTO content_items (item_type, title, subtitle, body, meta_value, image_url, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
             $stmt->execute([$itemType, $title, $subtitle, $body, $metaValue, $imageUrl, $order]);
             $contentMessage = $contentTypes[$itemType] . ' added.';
+            $activePanel = 'content-items';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_content_item') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'content_item')) {
+        $contentError = 'Security validation failed. Please try again.';
+    } else {
+        $itemId = (int)($_POST['content_item_id'] ?? 0);
+        $itemType = $_POST['item_type'] ?? '';
+        $title = sanitize($_POST['title'] ?? '');
+        $subtitle = sanitize($_POST['subtitle'] ?? '');
+        $body = trim($_POST['body'] ?? '');
+        $metaValue = sanitize($_POST['meta_value'] ?? '');
+        $imageUrl = trim($_POST['image_url'] ?? '');
+        $order = (int)($_POST['display_order'] ?? 0);
+        $uploaded = $_FILES['content_image'] ?? null;
+        $hasUpload = $uploaded && (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE);
+        if ($hasUpload) $imageUrl = uploadManagedImage($uploaded, 'content', $title, $contentError);
+        if ($itemId <= 0 || !isset($contentTypes[$itemType])) {
+            $contentError = 'Choose a valid content item.';
+        } elseif ($title === '') {
+            $contentError = 'Title is required.';
+        }
+        if ($contentError === '') {
+            $stmt = $pdo->prepare('UPDATE content_items SET item_type = ?, title = ?, subtitle = ?, body = ?, meta_value = ?, image_url = ?, display_order = ? WHERE id = ?');
+            $stmt->execute([$itemType, $title, $subtitle, $body, $metaValue, $imageUrl, $order, $itemId]);
+            $contentMessage = $contentTypes[$itemType] . ' updated.';
             $activePanel = 'content-items';
         }
     }
@@ -406,6 +450,11 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     textarea.form-control { resize: vertical; }
     .settings-help { color: var(--gray); font-size: 0.86rem; margin-bottom: 1.2rem; line-height: 1.6; }
     .thumb { width: 84px; height: 58px; object-fit: cover; border-radius: 10px; background: var(--gray-light); box-shadow: 0 5px 14px rgba(12,30,72,0.11); }
+    .table-input { min-width: 150px; padding: 0.5rem 0.65rem; font-size: 0.82rem; }
+    .table-textarea { min-width: 230px; min-height: 76px; padding: 0.55rem 0.65rem; font-size: 0.82rem; }
+    .row-actions { display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-start; }
+    .save-row-btn { background: var(--blue); color: var(--white); border: 0; border-radius: 999px; padding: 0.45rem 0.8rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .delete-row-btn { background: #fff1f1; color: #9b1c1c; border: 1px solid #ffd4d4; border-radius: 999px; padding: 0.42rem 0.75rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .admin-time { font-size: 0.8rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); padding: 0.3rem 0.8rem; border-radius: 15px; }
     @media(max-width:1180px) { .dashboard-stats { grid-template-columns: repeat(2,1fr); } .dashboard-hero { align-items: flex-start; flex-direction: column; } .dashboard-actions { justify-content: flex-start; } }
     @media(max-width:820px) { .admin-header { padding: 0 1rem; } .admin-header-brand small, .admin-time { display: none; } .admin-sidebar { position: static; width: 100%; padding: 0.8rem; box-shadow: none; } .admin-layout { display: block; } .sidebar-nav { display: flex; overflow-x: auto; gap: 0.4rem; padding-bottom: 0.2rem; } .sidebar-nav li { flex: 0 0 auto; } .sidebar-section-label { display: none; } .sidebar-nav a { white-space: nowrap; } .admin-main { margin-left: 0; padding: 1rem; } .dashboard-stats, .form-grid, .form-grid-3 { grid-template-columns: 1fr; } .publish-card { padding: 1rem; } }
@@ -515,7 +564,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
           <div class="publish-card">
             <?php if ($settingsMessage): ?><div class="alert alert-success show"><?= e($settingsMessage) ?></div><?php endif; ?>
             <?php if ($settingsError): ?><div class="alert alert-error show"><?= e($settingsError) ?></div><?php endif; ?>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
               <input type="hidden" name="action" value="save_settings">
               <input type="hidden" name="csrf_token" value="<?= e($csrfSettings) ?>">
               <div class="form-grid">
@@ -523,7 +572,11 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
                   <div class="form-group">
                     <input type="hidden" name="setting_keys[]" value="<?= e($key) ?>">
                     <label for="<?= e($key) ?>"><?= e($field['label']) ?></label>
-                    <?php if (($field['type'] ?? 'text') === 'textarea'): ?>
+                    <?php if (($field['type'] ?? 'text') === 'image'): ?>
+                      <?php if (!empty($settings[$key])): ?><img class="thumb" src="<?= filter_var($settings[$key], FILTER_VALIDATE_URL) ? e($settings[$key]) : '../' . e($settings[$key]) ?>" alt=""><?php endif; ?>
+                      <input class="form-control" type="file" name="setting_upload[<?= e($key) ?>]" accept="image/jpeg,image/png,image/webp,image/gif">
+                      <input class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e($settings[$key] ?? '') ?>" placeholder="Current image path or URL">
+                    <?php elseif (($field['type'] ?? 'text') === 'textarea'): ?>
                       <textarea class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" rows="3"><?= e($settings[$key] ?? '') ?></textarea>
                     <?php else: ?>
                       <input class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e($settings[$key] ?? '') ?>">
@@ -579,23 +632,44 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
         <div class="data-table-wrap">
           <div class="table-scroll">
             <table class="data-table">
-              <thead><tr><th>Type</th><th>Title</th><th>Subtitle</th><th>Meta</th><th>Order</th><th>Action</th></tr></thead>
+              <thead><tr><th>Image</th><th>Type</th><th>Title</th><th>Subtitle</th><th>Description</th><th>Meta</th><th>Order</th><th>Action</th></tr></thead>
               <tbody>
-                <?php if (!$contentItems): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</td></tr><?php endif; ?>
+                <?php if (!$contentItems): ?><tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem">No page items yet.</td></tr><?php endif; ?>
                 <?php foreach ($contentItems as $item): ?>
+                  <?php $contentFormId = 'content-item-' . (int)$item['id']; ?>
                   <tr data-content-type="<?= e($item['item_type']) ?>">
-                    <td><span class="method-badge"><?= e($contentTypes[$item['item_type']] ?? $item['item_type']) ?></span></td>
-                    <td><strong><?= e($item['title']) ?></strong><br><span style="color:var(--gray);font-size:0.8rem"><?= e(substr((string)$item['body'], 0, 90)) ?></span></td>
-                    <td><?= e($item['subtitle'] ?: '-') ?></td>
-                    <td><?= e($item['meta_value'] ?: '-') ?></td>
-                    <td><?= (int)$item['display_order'] ?></td>
                     <td>
-                      <form method="POST" onsubmit="return confirm('Remove this page item?')">
-                        <input type="hidden" name="action" value="delete_content_item">
-                        <input type="hidden" name="csrf_token" value="<?= e($csrfContentItemDelete) ?>">
-                        <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
-                        <button class="logout-btn" type="submit" style="color:#9b1c1c">Remove</button>
-                      </form>
+                      <?php if ($item['image_url']): ?><img class="thumb" src="<?= e($item['image_url']) ?>" alt=""><?php endif; ?>
+                      <input form="<?= e($contentFormId) ?>" class="form-control table-input" type="file" name="content_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                      <input form="<?= e($contentFormId) ?>" class="form-control table-input" name="image_url" value="<?= e($item['image_url'] ?? '') ?>" placeholder="images/... or URL">
+                    </td>
+                    <td>
+                      <select form="<?= e($contentFormId) ?>" class="form-control table-input" name="item_type">
+                        <?php foreach ($contentTypes as $value => $label): ?>
+                          <option value="<?= e($value) ?>" <?= $item['item_type'] === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </td>
+                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="title" value="<?= e($item['title']) ?>"></td>
+                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="subtitle" value="<?= e($item['subtitle'] ?? '') ?>"></td>
+                    <td><textarea form="<?= e($contentFormId) ?>" class="form-control table-textarea" name="body"><?= e($item['body'] ?? '') ?></textarea></td>
+                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" name="meta_value" value="<?= e($item['meta_value'] ?? '') ?>"></td>
+                    <td><input form="<?= e($contentFormId) ?>" class="form-control table-input" style="min-width:80px" type="number" name="display_order" value="<?= (int)$item['display_order'] ?>"></td>
+                    <td>
+                      <div class="row-actions">
+                        <form id="<?= e($contentFormId) ?>" method="POST" enctype="multipart/form-data">
+                          <input type="hidden" name="action" value="update_content_item">
+                          <input type="hidden" name="csrf_token" value="<?= e($csrfContentItem) ?>">
+                          <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
+                          <button class="save-row-btn" type="submit">Save</button>
+                        </form>
+                        <form method="POST" onsubmit="return confirm('Remove this page item?')">
+                          <input type="hidden" name="action" value="delete_content_item">
+                          <input type="hidden" name="csrf_token" value="<?= e($csrfContentItemDelete) ?>">
+                          <input type="hidden" name="content_item_id" value="<?= (int)$item['id'] ?>">
+                          <button class="delete-row-btn" type="submit">Remove</button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -630,22 +704,36 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
         <div class="data-table-wrap">
           <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Image</th><th>Title</th><th>Category</th><th>Order</th><th>Action</th></tr></thead>
+            <thead><tr><th>Image</th><th>Title</th><th>Category</th><th>Caption</th><th>Order</th><th>Action</th></tr></thead>
             <tbody>
-              <?php if (!$galleryItems): ?><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">No gallery items yet.</td></tr><?php endif; ?>
+              <?php if (!$galleryItems): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No gallery items yet.</td></tr><?php endif; ?>
               <?php foreach ($galleryItems as $item): ?>
+                <?php $galleryFormId = 'gallery-item-' . (int)$item['id']; ?>
                 <tr>
-                  <td><img class="thumb" src="<?= e($item['image_url']) ?>" alt=""></td>
-                  <td><strong><?= e($item['title']) ?></strong><br><span style="color:var(--gray);font-size:0.8rem"><?= e($item['caption']) ?></span></td>
-                  <td><?= e($item['category']) ?></td>
-                  <td><?= (int)$item['display_order'] ?></td>
                   <td>
-                    <form method="POST" onsubmit="return confirm('Remove this gallery item?')">
-                      <input type="hidden" name="action" value="delete_gallery">
-                      <input type="hidden" name="csrf_token" value="<?= e($csrfGalleryDelete) ?>">
-                      <input type="hidden" name="gallery_id" value="<?= (int)$item['id'] ?>">
-                      <button class="logout-btn" type="submit" style="color:#9b1c1c">Remove</button>
-                    </form>
+                    <img class="thumb" src="<?= e($item['image_url']) ?>" alt="">
+                    <input form="<?= e($galleryFormId) ?>" class="form-control table-input" type="file" name="gallery_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <input form="<?= e($galleryFormId) ?>" class="form-control table-input" name="image_url" value="<?= e($item['image_url']) ?>">
+                  </td>
+                  <td><input form="<?= e($galleryFormId) ?>" class="form-control table-input" name="title" value="<?= e($item['title']) ?>"></td>
+                  <td><input form="<?= e($galleryFormId) ?>" class="form-control table-input" name="category" value="<?= e($item['category']) ?>"></td>
+                  <td><textarea form="<?= e($galleryFormId) ?>" class="form-control table-textarea" name="caption"><?= e($item['caption']) ?></textarea></td>
+                  <td><input form="<?= e($galleryFormId) ?>" class="form-control table-input" style="min-width:80px" type="number" name="display_order" value="<?= (int)$item['display_order'] ?>"></td>
+                  <td>
+                    <div class="row-actions">
+                      <form id="<?= e($galleryFormId) ?>" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_gallery">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfGallery) ?>">
+                        <input type="hidden" name="gallery_id" value="<?= (int)$item['id'] ?>">
+                        <button class="save-row-btn" type="submit">Save</button>
+                      </form>
+                      <form method="POST" onsubmit="return confirm('Remove this gallery item?')">
+                        <input type="hidden" name="action" value="delete_gallery">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfGalleryDelete) ?>">
+                        <input type="hidden" name="gallery_id" value="<?= (int)$item['id'] ?>">
+                        <button class="delete-row-btn" type="submit">Remove</button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               <?php endforeach; ?>

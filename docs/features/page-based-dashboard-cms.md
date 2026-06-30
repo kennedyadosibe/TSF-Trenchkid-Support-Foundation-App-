@@ -33,6 +33,8 @@ The Page Items Manager controls repeatable sections:
 
 The manager includes filters so admins can view one content type at a time.
 
+Existing page items can be edited directly from the table. Admins can change names, roles, descriptions, ordering, initials/stat values, URLs, and upload a replacement image without deleting the item.
+
 These records are stored in `content_items` and loaded on public pages through `BACKEND/content_items.php`.
 
 ## Uploads
@@ -41,6 +43,23 @@ These records are stored in `content_items` and loaded on public pages through `
 - Gallery images upload into `images/gallery/`.
 - Accepted image types: JPG, PNG, WebP, GIF.
 - Maximum upload size: 4MB.
+
+Gallery rows are editable too, including title, category, caption, order, URL fallback, and replacement image upload.
+
+## Page Hero Images
+
+Each public page editor includes a hero background image field. Admins can upload or replace the main page header image for:
+
+- Home
+- About
+- Team
+- Impact
+- Gallery
+- News
+- Donate
+- Contact
+
+Uploaded page header images are stored in `images/page/` and applied on the public pages through `data-setting-bg`.
 
 ## Public Rendering
 

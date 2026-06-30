@@ -146,6 +146,12 @@ async function applySiteSettings() {
           el.textContent = value;
         }
       });
+      document.querySelectorAll(`[data-setting-bg="${key}"]`).forEach(el => {
+        if (!value) return;
+        el.style.backgroundImage = `linear-gradient(rgba(7, 24, 68, 0.62), rgba(26, 63, 163, 0.62)), url("${value}")`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+      });
     });
     applyContactFallbackSettings(data.settings);
   } catch (_) {
