@@ -33,7 +33,9 @@ The admin dashboard now controls editable public site content through shared sit
 
 ## Notes
 
-Gallery photos and news articles are managed separately from the page copy. Gallery items can be added with direct image uploads, with URL entry kept only as a fallback. Password recovery email delivery still depends on XAMPP/PHP mail or SMTP configuration.
+Gallery photos and news articles are managed separately from the page copy. Gallery items can be added with direct image uploads, with URL entry kept only as a fallback.
+
+Password recovery never displays the reset link on the website. When the recovery email matches an admin account, the system creates a one-time token, stores only its hash, emails the reset link to the registered address, and shows the same generic message either way. Reset requests are throttled for five minutes per admin account.
 
 ## Gallery Uploads
 

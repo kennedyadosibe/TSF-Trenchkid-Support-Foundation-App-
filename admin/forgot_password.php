@@ -6,7 +6,6 @@ startSecureSession();
 
 $message = '';
 $error = '';
-$devResetLink = '';
 $csrfToken = generateCsrfToken('forgot_password');
 
 function buildResetUrl(string $token): string {
@@ -30,25 +29,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin = $stmt->fetch();
 
             if ($admin) {
-                $token = bin2hex(random_bytes(32));
-                $tokenHash = hash('sha256', $token);
-                $expiresAt = date('Y-m-d H:i:s', time() + 1800);
+                $pdo->prepare('DELETE FROM password_resets WHERE expires_at < NOW() OR used_at IS NOT NULL')
+                    ->execute();
 
-                $pdo->prepare('DELETE FROM password_resets WHERE admin_id = ? OR expires_at < NOW() OR used_at IS NOT NULL')
-                    ->execute([$admin['id']]);
-                $pdo->prepare('INSERT INTO password_resets (admin_id, token_hash, expires_at) VALUES (?, ?, ?)')
-                    ->execute([$admin['id'], $tokenHash, $expiresAt]);
+                $recentStmt = $pdo->prepare(
+                    'SELECT id FROM password_resets
+                     WHERE admin_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                     LIMIT 1'
+                );
+                $recentStmt->execute([$admin['id']]);
 
-                $resetUrl = buildResetUrl($token);
-                $subject = 'TSF admin password reset';
-                $body = "Hello " . ($admin['full_name'] ?: 'Admin') . ",\n\n"
-                    . "Use this link to reset your TSF admin password. It expires in 30 minutes:\n"
-                    . $resetUrl . "\n\nIf you did not request this, ignore this email.";
-                $headers = 'From: ' . FROM_NAME . ' <' . FROM_EMAIL . '>';
-                @mail($admin['email'], $subject, $body, $headers);
+                if (!$recentStmt->fetch()) {
+                    $token = bin2hex(random_bytes(32));
+                    $tokenHash = hash('sha256', $token);
+                    $expiresAt = date('Y-m-d H:i:s', time() + 1800);
 
-                if (in_array($_SERVER['HTTP_HOST'] ?? '', ['127.0.0.1:8080', 'localhost:8080'], true)) {
-                    $devResetLink = $resetUrl;
+                    $pdo->prepare('DELETE FROM password_resets WHERE admin_id = ?')
+                        ->execute([$admin['id']]);
+                    $pdo->prepare('INSERT INTO password_resets (admin_id, token_hash, expires_at) VALUES (?, ?, ?)')
+                        ->execute([$admin['id'], $tokenHash, $expiresAt]);
+
+                    $resetUrl = buildResetUrl($token);
+                    $subject = 'TSF admin password reset';
+                    $body = "Hello " . ($admin['full_name'] ?: 'Admin') . ",\n\n"
+                        . "Use this link to reset your TSF admin password. It expires in 30 minutes:\n"
+                        . $resetUrl . "\n\nIf you did not request this, ignore this email. Your password will not change unless this link is opened and a new password is saved.";
+                    $headers = "From: " . FROM_NAME . " <" . FROM_EMAIL . ">\r\n"
+                        . "Reply-To: " . ADMIN_EMAIL . "\r\n"
+                        . "X-Mailer: PHP/" . phpversion();
+                    @mail($admin['email'], $subject, $body, $headers);
                 }
             }
 
@@ -76,7 +85,6 @@ function e($value): string {
     .reset-card img { height: 64px; display: block; margin: 0 auto 1rem; }
     .reset-card h1 { font-family: 'Playfair Display', serif; color: var(--blue-dark); font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem; }
     .reset-card p { color: var(--gray); text-align: center; line-height: 1.6; font-size: 0.9rem; margin-bottom: 1.4rem; }
-    .dev-link { display: block; word-break: break-all; background: rgba(26,63,163,0.08); border-radius: 10px; padding: 0.8rem; color: var(--blue); font-size: 0.82rem; margin-top: 1rem; }
     .back-link { display: block; text-align: center; margin-top: 1.2rem; color: var(--gray); text-decoration: none; }
   </style>
 </head>
@@ -95,7 +103,6 @@ function e($value): string {
       </div>
       <button class="btn btn-blue btn-lg" type="submit" style="width:100%">Send Reset Link</button>
     </form>
-    <?php if ($devResetLink): ?><a class="dev-link" href="<?= e($devResetLink) ?>">Local test reset link: <?= e($devResetLink) ?></a><?php endif; ?>
     <a class="back-link" href="login.php">Back to login</a>
   </div>
 </body>

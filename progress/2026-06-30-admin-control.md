@@ -12,6 +12,7 @@ Date: 2026-06-30
 - Updated the settings API to return defaults for newly added fields even before they are saved in the database.
 - Enhanced the admin dashboard layout with cleaner cards, sidebar navigation, table scroll containers, quick actions, and interactive settings accordions.
 - Added direct gallery image uploads into `images/gallery/`, with URL entry retained as a fallback.
+- Hardened password recovery so reset links are only sent by email, never displayed on the recovery page, and repeated reset emails are throttled.
 
 ## Current Branch
 
@@ -21,4 +22,4 @@ Date: 2026-06-30
 ## Next Useful Work
 
 - Add richer managers for team members, testimonials, FAQs, and impact numbers if those should be editable item-by-item.
-- Configure SMTP/PHP mail for real password recovery email delivery.
+- Configure SMTP/PHP mail credentials on hosting so password recovery emails are delivered reliably.
