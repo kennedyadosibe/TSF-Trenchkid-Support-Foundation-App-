@@ -31,6 +31,7 @@ For live hosting, set these in the hosting control panel or server environment i
 - If hosting does not support environment variables, copy `BACKEND/config.local.example.php` to `BACKEND/config.local.php` on the server and put the hosting credentials there. `config.local.php` is ignored by git.
 - On local XAMPP without SMTP credentials, password reset links are saved in `logs/password-reset-links.log` for testing.
 - Uploaded files in `images/content/`, `images/gallery/`, `images/news/`, and `images/page/` must be copied to hosting if they should appear live.
+- InfinityFree does not allow creating arbitrary databases or views on free MySQL accounts, so donation totals are calculated directly from `donors` instead of relying on a database view.
 
 ## InfinityFree Test Hosting
 

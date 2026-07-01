@@ -48,7 +48,11 @@ $stmt->execute($params);
 $donors = $stmt->fetchAll();
 
 // Summary
-$summaryStmt = $pdo->query("SELECT total_donors, total_raised, last_donation_at FROM donation_summary");
+$summaryStmt = $pdo->query(
+    'SELECT COUNT(*) AS total_donors, COALESCE(SUM(amount), 0) AS total_raised, MAX(created_at) AS last_donation_at
+     FROM donors
+     WHERE payment_verified = 1'
+);
 $summary = $summaryStmt->fetch() ?: ['total_donors' => 0, 'total_raised' => 0, 'last_donation_at' => null];
 
 echo json_encode([

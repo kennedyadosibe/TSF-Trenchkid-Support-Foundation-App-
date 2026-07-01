@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS admin (
     locked_until DATETIME DEFAULT NULL,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-
 -- Default admin (password: TSF@2025! — bcrypt)
 INSERT INTO admin (username, password, full_name, email)
 VALUES ('tsf_admin', '$2y$10$elj.R7hftBzDPS7IFCK0gOjP.PzMQrkgZFlfKWfZXMHswqGgL/X4e', 'TSF Administrator', 'admin@tsfghana.org')
@@ -249,16 +248,3 @@ CREATE TABLE IF NOT EXISTS csrf_tokens (
     INDEX idx_token (token),
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB;
-
-
--- ============================================
--- DONATION TOTALS VIEW
--- ============================================
-CREATE OR REPLACE VIEW donation_summary AS
-SELECT
-    COUNT(*) AS total_donors,
-    SUM(amount) AS total_raised,
-    MAX(created_at) AS last_donation_at,
-    AVG(amount) AS average_donation
-FROM donors
-WHERE payment_verified = 1;
