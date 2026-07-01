@@ -80,4 +80,4 @@ The Publish Article panel supports optional cover image upload. Uploaded covers 
 
 Each published article receives a public reading URL in the format `article.php?slug=article-slug`. The dashboard shows this URL immediately after publishing, Recent Articles links to it, and public News cards use it for the article title and Read Article action.
 
-Admins can remove published articles from the Recent Articles panel. The delete action unpublishes the article so it disappears from the public News page and direct article URL without destroying the database row.
+Admins can remove published articles from the Recent Articles table inside the Articles dashboard panel. The delete action unpublishes the article so it disappears from the public News page and direct article URL without destroying the database row.

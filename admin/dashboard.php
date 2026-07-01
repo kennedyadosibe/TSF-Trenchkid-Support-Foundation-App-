@@ -90,7 +90,7 @@ function dashboardPanelForAction(string $action): string {
         'add_gallery' => 'gallery',
         'update_gallery' => 'gallery',
         'delete_gallery' => 'gallery',
-        'delete_article' => 'news',
+        'delete_article' => 'publish',
         'add_content_item' => 'content-items',
         'update_content_item' => 'content-items',
         'delete_content_item' => 'content-items',
@@ -280,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
             $stmt->execute([$articleId]);
             $publishMessage = 'Article removed from the public site.';
         }
-        $activePanel = 'news';
+        $activePanel = 'publish';
     }
 }
 
@@ -945,12 +945,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
             </div>
           <?php endif; ?>
         </div>
-      </section>
-
-      <section class="admin-section" id="news">
-        <div class="admin-section-header"><div><h3>Recent Articles</h3><p>Latest published updates from the news system.</p></div></div>
-        <?php if ($publishMessage): ?><div class="alert alert-success show"><?= e($publishMessage) ?></div><?php endif; ?>
-        <?php if ($publishError): ?><div class="alert alert-error show"><?= e($publishError) ?></div><?php endif; ?>
+        <div class="admin-section-header" style="margin-top:1.5rem"><div><h3>Recent Articles</h3><p>Published articles currently visible on the public News page.</p></div></div>
         <div class="data-table-wrap">
           <div class="table-scroll">
           <table class="data-table">
