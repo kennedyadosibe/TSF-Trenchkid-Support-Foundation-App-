@@ -27,3 +27,4 @@ Date: 2026-06-30
 - Published news articles can now include uploaded cover images from `images/news/`.
 - Public gallery images can now be clicked to view a larger preview and download the image.
 - Published articles now generate a public article URL so readers can open a single article directly.
+- Dashboard form saves now redirect back to a clean dashboard URL, preventing refresh from re-submitting an old CSRF token.

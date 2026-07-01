@@ -18,6 +18,20 @@ $contentError = '';
 $accountMessage = '';
 $accountError = '';
 $publishedArticleUrl = '';
+$dashboardFlash = $_SESSION['dashboard_flash'] ?? [];
+unset($_SESSION['dashboard_flash']);
+$activePanel = $dashboardFlash['activePanel'] ?? $activePanel;
+$publishMessage = $dashboardFlash['publishMessage'] ?? $publishMessage;
+$publishError = $dashboardFlash['publishError'] ?? $publishError;
+$settingsMessage = $dashboardFlash['settingsMessage'] ?? $settingsMessage;
+$settingsError = $dashboardFlash['settingsError'] ?? $settingsError;
+$galleryMessage = $dashboardFlash['galleryMessage'] ?? $galleryMessage;
+$galleryError = $dashboardFlash['galleryError'] ?? $galleryError;
+$contentMessage = $dashboardFlash['contentMessage'] ?? $contentMessage;
+$contentError = $dashboardFlash['contentError'] ?? $contentError;
+$accountMessage = $dashboardFlash['accountMessage'] ?? $accountMessage;
+$accountError = $dashboardFlash['accountError'] ?? $accountError;
+$publishedArticleUrl = $dashboardFlash['publishedArticleUrl'] ?? $publishedArticleUrl;
 $contentTypes = [
     'team_member' => 'Team Member',
     'advisor' => 'Advisor',
@@ -67,6 +81,52 @@ function buildPublicArticleUrl(string $slug): string {
         return '../article.php?slug=' . urlencode($slug);
     }
     return $scheme . '://' . $host . '/article.php?slug=' . urlencode($slug);
+}
+
+function dashboardPanelForAction(string $action): string {
+    return [
+        'publish_article' => 'publish',
+        'save_settings' => 'overview',
+        'add_gallery' => 'gallery',
+        'update_gallery' => 'gallery',
+        'delete_gallery' => 'gallery',
+        'add_content_item' => 'content-items',
+        'update_content_item' => 'content-items',
+        'delete_content_item' => 'content-items',
+        'update_account' => 'account',
+    ][$action] ?? 'overview';
+}
+
+function redirectDashboardAfterPost(
+    string $activePanel,
+    string $publishMessage,
+    string $publishError,
+    string $settingsMessage,
+    string $settingsError,
+    string $galleryMessage,
+    string $galleryError,
+    string $contentMessage,
+    string $contentError,
+    string $accountMessage,
+    string $accountError,
+    string $publishedArticleUrl
+): void {
+    $_SESSION['dashboard_flash'] = [
+        'activePanel' => $activePanel,
+        'publishMessage' => $publishMessage,
+        'publishError' => $publishError,
+        'settingsMessage' => $settingsMessage,
+        'settingsError' => $settingsError,
+        'galleryMessage' => $galleryMessage,
+        'galleryError' => $galleryError,
+        'contentMessage' => $contentMessage,
+        'contentError' => $contentError,
+        'accountMessage' => $accountMessage,
+        'accountError' => $accountError,
+        'publishedArticleUrl' => $publishedArticleUrl,
+    ];
+    header('Location: dashboard.php#' . rawurlencode($activePanel));
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publish_article') {
@@ -294,6 +354,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             $activePanel = 'account';
         }
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($activePanel === 'overview') {
+        $activePanel = dashboardPanelForAction($_POST['action'] ?? '');
+    }
+    redirectDashboardAfterPost(
+        $activePanel,
+        $publishMessage,
+        $publishError,
+        $settingsMessage,
+        $settingsError,
+        $galleryMessage,
+        $galleryError,
+        $contentMessage,
+        $contentError,
+        $accountMessage,
+        $accountError,
+        $publishedArticleUrl
+    );
 }
 
 $csrfPublish = generateCsrfToken('publish');
