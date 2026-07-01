@@ -415,7 +415,7 @@ $donors = $pdo->query(
      FROM donors ORDER BY created_at DESC LIMIT 100'
 )->fetchAll();
 $recentNews = $pdo->query(
-    'SELECT id, title, slug, category, author_name, cover_image, published_at FROM news WHERE is_published = 1 ORDER BY created_at DESC LIMIT 8'
+    'SELECT id, title, slug, category, author_name, cover_image, is_published, published_at, created_at FROM news ORDER BY created_at DESC LIMIT 12'
 )->fetchAll();
 $messages = $pdo->query(
     'SELECT name, email, subject, message_type, message, created_at FROM messages ORDER BY created_at DESC LIMIT 50'
@@ -501,7 +501,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     body { background: #eef2f8; min-height: 100vh; overflow-x: hidden; }
     .admin-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: linear-gradient(135deg, #071844, var(--blue-dark) 52%, var(--blue)); padding: 0 1.5rem; height: 68px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 12px 35px rgba(5,16,45,0.22); }
     .admin-header-brand { display: flex; align-items: center; gap: 0.8rem; }
-    .admin-header-brand img { height: 42px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22)); }
+    .admin-header-brand img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: var(--white); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22)); }
     .admin-header-brand span { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--white); }
     .admin-header-brand small { font-size: 0.7rem; color: var(--gold-light); display: block; letter-spacing: 1px; text-transform: uppercase; }
     .admin-header-right { display: flex; align-items: center; gap: 1rem; }
@@ -945,27 +945,32 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
             </div>
           <?php endif; ?>
         </div>
-        <div class="admin-section-header" style="margin-top:1.5rem"><div><h3>Recent Articles</h3><p>Published articles currently visible on the public News page.</p></div></div>
+        <div class="admin-section-header" style="margin-top:1.5rem"><div><h3>Recent Articles</h3><p>Recent article records. Published items appear on the public News page; unpublished items are hidden.</p></div></div>
         <div class="data-table-wrap">
           <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Action</th></tr></thead>
+            <thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
             <tbody>
-              <?php if (!$recentNews): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No articles published yet.</td></tr><?php endif; ?>
+              <?php if (!$recentNews): ?><tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">No articles created yet.</td></tr><?php endif; ?>
               <?php foreach ($recentNews as $n): ?>
                 <tr>
                   <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= filter_var($n['cover_image'], FILTER_VALIDATE_URL) ? e($n['cover_image']) : '../' . e($n['cover_image']) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
-                  <td><strong><a href="../article.php?slug=<?= e($n['slug']) ?>" target="_blank" rel="noopener" style="color:var(--blue-dark)"><?= e($n['title']) ?></a></strong></td>
+                  <td><strong><?php if ($n['is_published']): ?><a href="../article.php?slug=<?= e($n['slug']) ?>" target="_blank" rel="noopener" style="color:var(--blue-dark)"><?= e($n['title']) ?></a><?php else: ?><?= e($n['title']) ?><?php endif; ?></strong></td>
                   <td><?= e($n['category']) ?></td>
                   <td><?= e($n['author_name']) ?></td>
-                  <td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : '-' ?></td>
+                  <td><span class="<?= $n['is_published'] ? 'status-ok' : 'status-wait' ?>"><?= $n['is_published'] ? 'Published' : 'Unpublished' ?></span></td>
+                  <td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : e(date('d M Y', strtotime($n['created_at']))) ?></td>
                   <td>
-                    <form method="POST" onsubmit="return confirm('Remove this article from the public site?')">
-                      <input type="hidden" name="action" value="delete_article">
-                      <input type="hidden" name="csrf_token" value="<?= e($csrfArticleDelete) ?>">
-                      <input type="hidden" name="article_id" value="<?= (int)$n['id'] ?>">
-                      <button class="delete-row-btn" type="submit">Delete</button>
-                    </form>
+                    <?php if ($n['is_published']): ?>
+                      <form method="POST" onsubmit="return confirm('Remove this article from the public site?')">
+                        <input type="hidden" name="action" value="delete_article">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfArticleDelete) ?>">
+                        <input type="hidden" name="article_id" value="<?= (int)$n['id'] ?>">
+                        <button class="delete-row-btn" type="submit">Delete</button>
+                      </form>
+                    <?php else: ?>
+                      <span class="method-badge">Hidden</span>
+                    <?php endif; ?>
                   </td>
                 </tr>
               <?php endforeach; ?>

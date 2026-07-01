@@ -29,3 +29,4 @@ Date: 2026-06-30
 - Published articles now generate a public article URL so readers can open a single article directly.
 - Dashboard form saves now redirect back to a clean dashboard URL, preventing refresh from re-submitting an old CSRF token.
 - Admins can now delete/unpublish published articles from the Recent Articles dashboard panel.
+- Recent Articles now lists both public and hidden article records so unpublished items do not disappear from the admin view.

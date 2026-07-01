@@ -64,7 +64,7 @@ function e($value): string {
   <style>
     body { background: linear-gradient(135deg, var(--blue-dark), var(--dark)); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
     .reset-card { background: var(--white); border-radius: 18px; width: 100%; max-width: 460px; padding: 2.4rem; box-shadow: 0 24px 70px rgba(0,0,0,0.34); }
-    .reset-card img { height: 64px; display: block; margin: 0 auto 1rem; }
+    .reset-card img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--white); display: block; margin: 0 auto 1rem; }
     .reset-card h1 { font-family: 'Playfair Display', serif; color: var(--blue-dark); font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem; }
     .reset-card p { color: var(--gray); text-align: center; line-height: 1.6; font-size: 0.9rem; margin-bottom: 1.4rem; }
     .back-link { display: block; text-align: center; margin-top: 1.2rem; color: var(--gray); text-decoration: none; }

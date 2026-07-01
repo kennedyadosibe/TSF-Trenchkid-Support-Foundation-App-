@@ -13,6 +13,9 @@ Date: 2026-06-30
 - Enhanced the admin dashboard layout with cleaner cards, sidebar navigation, table scroll containers, quick actions, and interactive settings accordions.
 - Added direct gallery image uploads into `images/gallery/`, with URL entry retained as a fallback.
 - Hardened password recovery so reset links are only sent by email, never displayed on the recovery page, and repeated reset emails are throttled.
+- Updated configuration to read hosting credentials, Paystack keys, SMTP settings, and SMS settings from environment variables.
+- Added a hosting readiness checklist for live deployment.
+- Changed public and admin logo displays to circular image frames.
 
 ## Current Branch
 
@@ -22,4 +25,4 @@ Date: 2026-06-30
 ## Next Useful Work
 
 - Add richer managers for team members, testimonials, FAQs, and impact numbers if those should be editable item-by-item.
-- Configure SMTP/PHP mail credentials on hosting so password recovery emails are delivered reliably.
+- Configure live environment variables on hosting and run an end-to-end live-domain test.

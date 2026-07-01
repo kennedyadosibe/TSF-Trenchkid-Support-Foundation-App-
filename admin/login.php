@@ -79,14 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login — TSF</title>
+  <title>Admin Login - TSF</title>
   <link rel="icon" href="../images/tsf-logo.png">
   <link rel="stylesheet" href="../css/style.css">
   <style>
     body { background: linear-gradient(135deg, var(--blue-dark) 0%, #0a1a5c 50%, var(--dark) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
     .login-card { background: var(--white); border-radius: 24px; width: 100%; max-width: 440px; padding: 3rem 2.5rem; box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
     .login-logo { text-align: center; margin-bottom: 2rem; }
-    .login-logo img { height: 72px; }
+    .login-logo img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: var(--white); }
     .login-logo h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--blue-dark); margin-top: 0.8rem; }
     .login-logo p { font-size: 0.85rem; color: var(--gray); margin-top: 0.3rem; }
     .login-divider { height: 2px; background: linear-gradient(to right, var(--blue), var(--gold)); border-radius: 2px; margin-bottom: 2rem; }
