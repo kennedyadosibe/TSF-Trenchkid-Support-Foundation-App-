@@ -7,6 +7,7 @@ The admin dashboard now controls editable public site content through shared sit
 ## Files
 
 - `BACKEND/content_definitions.php` defines editable fields, labels, defaults, and field types.
+- `BACKEND/email_helpers.php` sends application emails through SMTP when credentials are configured.
 - `BACKEND/site_settings.php` returns saved settings merged with defaults.
 - `admin/dashboard.php` renders the Site Settings form from the shared definitions.
 - Public pages use `data-setting` attributes so page text can be replaced from admin-managed settings.
@@ -35,7 +36,9 @@ The admin dashboard now controls editable public site content through shared sit
 
 Gallery photos and news articles are managed separately from the page copy. Gallery items can be added with direct image uploads, with URL entry kept only as a fallback.
 
-Password recovery never displays the reset link on the website. When the recovery email matches an admin account, the system creates a one-time token, stores only its hash, emails the reset link to the registered address, and shows the same generic message either way. Reset requests are throttled for five minutes per admin account.
+Password recovery never displays the reset link on the website. When the recovery email matches an admin account, the system creates a one-time token, stores only its hash, emails the reset link to the registered address, and shows the same generic message either way. Reset requests are throttled for five minutes per admin account, except local XAMPP testing can create a fresh fallback link when SMTP is not configured.
+
+On hosting, set the `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `FROM_EMAIL` environment variables so recovery links are sent by real email. On local XAMPP without SMTP credentials, failed recovery emails are written to `logs/password-reset-links.log` for testing.
 
 ## Gallery Uploads
 

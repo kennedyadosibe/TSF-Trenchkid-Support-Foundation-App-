@@ -1,11 +1,13 @@
 <?php
 define('TSF_LOADED', true);
 require_once __DIR__ . '/../BACKEND/connect.php';
+require_once __DIR__ . '/../BACKEND/email_helpers.php';
 
 startSecureSession();
 
 $message = '';
 $error = '';
+$deliveryNote = '';
 $csrfToken = generateCsrfToken('forgot_password');
 
 function buildResetUrl(string $token): string {
@@ -39,7 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $recentStmt->execute([$admin['id']]);
 
-                if (!$recentStmt->fetch()) {
+                $hasRecentReset = (bool)$recentStmt->fetch();
+                $needsLocalFallback = isLocalRequest() && SMTP_PASS === '';
+
+                if (!$hasRecentReset || $needsLocalFallback) {
                     $token = bin2hex(random_bytes(32));
                     $tokenHash = hash('sha256', $token);
                     $expiresAt = date('Y-m-d H:i:s', time() + 1800);
@@ -54,14 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $body = "Hello " . ($admin['full_name'] ?: 'Admin') . ",\n\n"
                         . "Use this link to reset your TSF admin password. It expires in 30 minutes:\n"
                         . $resetUrl . "\n\nIf you did not request this, ignore this email. Your password will not change unless this link is opened and a new password is saved.";
-                    $headers = "From: " . FROM_NAME . " <" . FROM_EMAIL . ">\r\n"
-                        . "Reply-To: " . ADMIN_EMAIL . "\r\n"
-                        . "X-Mailer: PHP/" . phpversion();
-                    @mail($admin['email'], $subject, $body, $headers);
+                    $sent = sendAppEmail($admin['email'], $subject, $body);
+                    if ($needsLocalFallback) {
+                        logLocalPasswordResetLink($admin['email'], $resetUrl);
+                    }
+                    if (!$sent) {
+                        if (isLocalRequest()) {
+                            $deliveryNote = 'Local email delivery is not configured. For XAMPP testing, check logs/password-reset-links.log for the reset link, or set SMTP_* environment variables to send real email.';
+                        }
+                    }
                 }
             }
 
             $message = 'If that email matches the admin account, a reset link has been sent.';
+            if (!$deliveryNote && isLocalRequest()) {
+                $deliveryNote = 'If no email arrives while testing locally, configure SMTP_* environment variables or check logs/app.log for mail delivery errors.';
+            }
         }
     }
     $csrfToken = generateCsrfToken('forgot_password');
@@ -94,6 +107,7 @@ function e($value): string {
     <h1>Password Recovery</h1>
     <p>Enter the admin recovery email. A secure reset link will be sent if the address is registered.</p>
     <?php if ($message): ?><div class="alert alert-success show"><?= e($message) ?></div><?php endif; ?>
+    <?php if ($deliveryNote): ?><div class="alert alert-error show"><?= e($deliveryNote) ?></div><?php endif; ?>
     <?php if ($error): ?><div class="alert alert-error show"><?= e($error) ?></div><?php endif; ?>
     <form method="POST">
       <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">

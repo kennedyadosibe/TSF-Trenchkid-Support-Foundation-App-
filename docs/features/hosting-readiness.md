@@ -25,8 +25,10 @@ For live hosting, set these in the hosting control panel or server environment i
 ## Notes
 
 - `PAYSTACK_SECRET_KEY` must be the live secret key only on the server.
+- `SMTP_*` values must be configured for admin password recovery emails to leave the server.
 - Do not put secret keys in `.html`, `.js`, or public GitHub repositories.
 - The site can still run locally with default database settings for XAMPP.
+- On local XAMPP without SMTP credentials, password reset links are saved in `logs/password-reset-links.log` for testing.
 - Uploaded files in `images/content/`, `images/gallery/`, `images/news/`, and `images/page/` must be copied to hosting if they should appear live.
 
 ## Before Going Live

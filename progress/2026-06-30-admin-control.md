@@ -16,6 +16,7 @@ Date: 2026-06-30
 - Updated configuration to read hosting credentials, Paystack keys, SMTP settings, and SMS settings from environment variables.
 - Added a hosting readiness checklist for live deployment.
 - Changed public and admin logo displays to circular image frames.
+- Added an SMTP-aware email helper for password recovery, with a local XAMPP reset-link fallback log when SMTP is not configured.
 
 ## Current Branch
 
