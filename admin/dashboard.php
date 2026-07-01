@@ -17,6 +17,7 @@ $contentMessage = '';
 $contentError = '';
 $accountMessage = '';
 $accountError = '';
+$publishedArticleUrl = '';
 $contentTypes = [
     'team_member' => 'Team Member',
     'advisor' => 'Advisor',
@@ -57,6 +58,17 @@ function uploadManagedImage(array $uploaded, string $folder, string $title, stri
     return 'images/' . $folder . '/' . $filename;
 }
 
+function buildPublicArticleUrl(string $slug): string {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+        ? 'https'
+        : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host === '') {
+        return '../article.php?slug=' . urlencode($slug);
+    }
+    return $scheme . '://' . $host . '/article.php?slug=' . urlencode($slug);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publish_article') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'publish')) {
         $publishError = 'Security validation failed. Please try again.';
@@ -89,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'publi
             );
             $stmt->execute([$title, $slug, $content, $category, $author ?: 'TSF Admin', $_SESSION['admin_id'], $coverImage ?: null, $featured]);
             $publishMessage = 'Article published successfully.';
+            $publishedArticleUrl = buildPublicArticleUrl($slug);
             $activePanel = 'publish';
         }
     }
@@ -304,7 +317,7 @@ $donors = $pdo->query(
      FROM donors ORDER BY created_at DESC LIMIT 100'
 )->fetchAll();
 $recentNews = $pdo->query(
-    'SELECT title, category, author_name, cover_image, published_at FROM news ORDER BY created_at DESC LIMIT 8'
+    'SELECT title, slug, category, author_name, cover_image, published_at FROM news ORDER BY created_at DESC LIMIT 8'
 )->fetchAll();
 $messages = $pdo->query(
     'SELECT name, email, subject, message_type, message, created_at FROM messages ORDER BY created_at DESC LIMIT 50'
@@ -827,6 +840,12 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
             </div>
             <button type="submit" class="btn btn-blue btn-lg">Publish Article</button>
           </form>
+          <?php if ($publishedArticleUrl): ?>
+            <div class="alert alert-success show" style="margin-top:1rem">
+              Article URL:
+              <a href="<?= e($publishedArticleUrl) ?>" target="_blank" rel="noopener" style="color:var(--blue);font-weight:800;word-break:break-all"><?= e($publishedArticleUrl) ?></a>
+            </div>
+          <?php endif; ?>
         </div>
       </section>
 
@@ -841,7 +860,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
               <?php foreach ($recentNews as $n): ?>
                 <tr>
                   <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= filter_var($n['cover_image'], FILTER_VALIDATE_URL) ? e($n['cover_image']) : '../' . e($n['cover_image']) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
-                  <td><strong><?= e($n['title']) ?></strong></td>
+                  <td><strong><a href="../article.php?slug=<?= e($n['slug']) ?>" target="_blank" rel="noopener" style="color:var(--blue-dark)"><?= e($n['title']) ?></a></strong></td>
                   <td><?= e($n['category']) ?></td>
                   <td><?= e($n['author_name']) ?></td>
                   <td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : '-' ?></td>
