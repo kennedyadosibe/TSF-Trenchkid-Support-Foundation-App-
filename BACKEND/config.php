@@ -10,17 +10,32 @@ if (!defined('TSF_LOADED')) {
     die('Direct access not permitted.');
 }
 
+$localConfig = __DIR__ . '/config.local.php';
+$local = is_file($localConfig) ? require $localConfig : [];
+if (!is_array($local)) {
+    $local = [];
+}
+
+function tsfConfigValue(string $key, $fallback = '') {
+    global $local;
+    $value = getenv($key);
+    if ($value !== false && $value !== '') {
+        return $value;
+    }
+    return $local[$key] ?? $fallback;
+}
+
 // ---- DATABASE ----
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'tsf');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
-define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
+define('DB_HOST', tsfConfigValue('DB_HOST', 'localhost'));
+define('DB_NAME', tsfConfigValue('DB_NAME', 'tsf'));
+define('DB_USER', tsfConfigValue('DB_USER', 'root'));
+define('DB_PASS', tsfConfigValue('DB_PASS', ''));
+define('DB_CHARSET', tsfConfigValue('DB_CHARSET', 'utf8mb4'));
 
 // ---- SITE ----
-define('SITE_URL', getenv('SITE_URL') ?: 'https://www.tsfghana.org');
-define('SITE_NAME', getenv('SITE_NAME') ?: 'Trenchkid Support Foundation');
-define('ADMIN_EMAIL', getenv('ADMIN_EMAIL') ?: 'admin@tsfghana.org');
+define('SITE_URL', tsfConfigValue('SITE_URL', 'https://www.tsfghana.org'));
+define('SITE_NAME', tsfConfigValue('SITE_NAME', 'Trenchkid Support Foundation'));
+define('ADMIN_EMAIL', tsfConfigValue('ADMIN_EMAIL', 'admin@tsfghana.org'));
 
 // ---- SECURITY ----
 define('CSRF_TOKEN_EXPIRY', 3600);       // 1 hour
@@ -30,23 +45,23 @@ define('SESSION_LIFETIME', 3600);        // 1 hour
 
 // ---- PAYMENT GATEWAY ----
 // Paystack handles card and Ghana mobile money checkout.
-define('PAYSTACK_SECRET_KEY', getenv('PAYSTACK_SECRET_KEY') ?: '');
-define('PAYSTACK_PUBLIC_KEY', getenv('PAYSTACK_PUBLIC_KEY') ?: '');
-define('PAYSTACK_CALLBACK_URL', getenv('PAYSTACK_CALLBACK_URL') ?: SITE_URL . '/donate.html');
+define('PAYSTACK_SECRET_KEY', tsfConfigValue('PAYSTACK_SECRET_KEY', ''));
+define('PAYSTACK_PUBLIC_KEY', tsfConfigValue('PAYSTACK_PUBLIC_KEY', ''));
+define('PAYSTACK_CALLBACK_URL', tsfConfigValue('PAYSTACK_CALLBACK_URL', SITE_URL . '/donate.html'));
 
 // ---- SMS ----
 // Add your SMS provider endpoint and API key here to send donor thank-you texts.
 // When these are empty, TSF stores the SMS message in the database for follow-up.
-define('SMS_API_URL', getenv('SMS_API_URL') ?: '');
-define('SMS_API_KEY', getenv('SMS_API_KEY') ?: '');
-define('SMS_SENDER_ID', getenv('SMS_SENDER_ID') ?: 'TSF');
+define('SMS_API_URL', tsfConfigValue('SMS_API_URL', ''));
+define('SMS_API_KEY', tsfConfigValue('SMS_API_KEY', ''));
+define('SMS_SENDER_ID', tsfConfigValue('SMS_SENDER_ID', 'TSF'));
 
 // ---- EMAIL ----
-define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
-define('SMTP_PORT', (int)(getenv('SMTP_PORT') ?: 587));
-define('SMTP_USER', getenv('SMTP_USER') ?: 'noreply@tsfghana.org');
-define('SMTP_PASS', getenv('SMTP_PASS') ?: '');
-define('FROM_EMAIL', getenv('FROM_EMAIL') ?: 'noreply@tsfghana.org');
+define('SMTP_HOST', tsfConfigValue('SMTP_HOST', 'smtp.gmail.com'));
+define('SMTP_PORT', (int)tsfConfigValue('SMTP_PORT', 587));
+define('SMTP_USER', tsfConfigValue('SMTP_USER', 'noreply@tsfghana.org'));
+define('SMTP_PASS', tsfConfigValue('SMTP_PASS', ''));
+define('FROM_EMAIL', tsfConfigValue('FROM_EMAIL', 'noreply@tsfghana.org'));
 define('FROM_NAME', SITE_NAME);
 
 // ---- ERROR REPORTING (disable in production) ----

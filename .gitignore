@@ -1,6 +1,7 @@
 logs/
 *.log
 .env
+BACKEND/config.local.php
 node_modules/
 vendor/
 tmp/

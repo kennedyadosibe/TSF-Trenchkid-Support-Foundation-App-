@@ -1,0 +1,20 @@
+<?php
+return [
+    'SITE_URL' => 'https://your-domain.infinityfreeapp.com',
+    'DB_HOST' => 'sqlXXX.infinityfree.com',
+    'DB_NAME' => 'if0_00000000_tsf',
+    'DB_USER' => 'if0_00000000',
+    'DB_PASS' => 'your_database_password',
+    'PAYSTACK_SECRET_KEY' => '',
+    'PAYSTACK_PUBLIC_KEY' => '',
+    'PAYSTACK_CALLBACK_URL' => 'https://your-domain.infinityfreeapp.com/donate.html',
+    'ADMIN_EMAIL' => 'your-email@example.com',
+    'SMTP_HOST' => 'smtp.gmail.com',
+    'SMTP_PORT' => 587,
+    'SMTP_USER' => 'your-email@example.com',
+    'SMTP_PASS' => 'your-app-password',
+    'FROM_EMAIL' => 'your-email@example.com',
+    'SMS_API_URL' => '',
+    'SMS_API_KEY' => '',
+    'SMS_SENDER_ID' => 'TSF',
+];
