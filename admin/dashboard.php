@@ -90,6 +90,7 @@ function dashboardPanelForAction(string $action): string {
         'add_gallery' => 'gallery',
         'update_gallery' => 'gallery',
         'delete_gallery' => 'gallery',
+        'delete_article' => 'news',
         'add_content_item' => 'content-items',
         'update_content_item' => 'content-items',
         'delete_content_item' => 'content-items',
@@ -267,6 +268,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_article') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'article_delete')) {
+        $publishError = 'Security validation failed. Please try again.';
+    } else {
+        $articleId = (int)($_POST['article_id'] ?? 0);
+        if ($articleId <= 0) {
+            $publishError = 'Choose a valid article to remove.';
+        } else {
+            $stmt = $pdo->prepare('UPDATE news SET is_published = 0, is_featured = 0 WHERE id = ?');
+            $stmt->execute([$articleId]);
+            $publishMessage = 'Article removed from the public site.';
+        }
+        $activePanel = 'news';
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_content_item') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'content_item')) {
         $contentError = 'Security validation failed. Please try again.';
@@ -380,6 +397,7 @@ $csrfPublish = generateCsrfToken('publish');
 $csrfSettings = generateCsrfToken('settings');
 $csrfGallery = generateCsrfToken('gallery');
 $csrfGalleryDelete = generateCsrfToken('gallery_delete');
+$csrfArticleDelete = generateCsrfToken('article_delete');
 $csrfContentItem = generateCsrfToken('content_item');
 $csrfContentItemDelete = generateCsrfToken('content_item_delete');
 $csrfAccount = generateCsrfToken('account');
@@ -397,7 +415,7 @@ $donors = $pdo->query(
      FROM donors ORDER BY created_at DESC LIMIT 100'
 )->fetchAll();
 $recentNews = $pdo->query(
-    'SELECT title, slug, category, author_name, cover_image, published_at FROM news ORDER BY created_at DESC LIMIT 8'
+    'SELECT id, title, slug, category, author_name, cover_image, published_at FROM news WHERE is_published = 1 ORDER BY created_at DESC LIMIT 8'
 )->fetchAll();
 $messages = $pdo->query(
     'SELECT name, email, subject, message_type, message, created_at FROM messages ORDER BY created_at DESC LIMIT 50'
@@ -931,12 +949,14 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
 
       <section class="admin-section" id="news">
         <div class="admin-section-header"><div><h3>Recent Articles</h3><p>Latest published updates from the news system.</p></div></div>
+        <?php if ($publishMessage): ?><div class="alert alert-success show"><?= e($publishMessage) ?></div><?php endif; ?>
+        <?php if ($publishError): ?><div class="alert alert-error show"><?= e($publishError) ?></div><?php endif; ?>
         <div class="data-table-wrap">
           <div class="table-scroll">
           <table class="data-table">
-            <thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th></tr></thead>
+            <thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Action</th></tr></thead>
             <tbody>
-              <?php if (!$recentNews): ?><tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem">No articles published yet.</td></tr><?php endif; ?>
+              <?php if (!$recentNews): ?><tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem">No articles published yet.</td></tr><?php endif; ?>
               <?php foreach ($recentNews as $n): ?>
                 <tr>
                   <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= filter_var($n['cover_image'], FILTER_VALIDATE_URL) ? e($n['cover_image']) : '../' . e($n['cover_image']) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
@@ -944,6 +964,14 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
                   <td><?= e($n['category']) ?></td>
                   <td><?= e($n['author_name']) ?></td>
                   <td><?= $n['published_at'] ? e(date('d M Y', strtotime($n['published_at']))) : '-' ?></td>
+                  <td>
+                    <form method="POST" onsubmit="return confirm('Remove this article from the public site?')">
+                      <input type="hidden" name="action" value="delete_article">
+                      <input type="hidden" name="csrf_token" value="<?= e($csrfArticleDelete) ?>">
+                      <input type="hidden" name="article_id" value="<?= (int)$n['id'] ?>">
+                      <button class="delete-row-btn" type="submit">Delete</button>
+                    </form>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             </tbody>

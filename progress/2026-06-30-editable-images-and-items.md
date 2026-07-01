@@ -28,3 +28,4 @@ Date: 2026-06-30
 - Public gallery images can now be clicked to view a larger preview and download the image.
 - Published articles now generate a public article URL so readers can open a single article directly.
 - Dashboard form saves now redirect back to a clean dashboard URL, preventing refresh from re-submitting an old CSRF token.
+- Admins can now delete/unpublish published articles from the Recent Articles dashboard panel.
