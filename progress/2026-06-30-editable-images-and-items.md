@@ -25,3 +25,4 @@ Date: 2026-06-30
 - Page header pictures can be changed directly from each page editor.
 - Admins can now read the full body of received messages without truncated text.
 - Published news articles can now include uploaded cover images from `images/news/`.
+- Public gallery images can now be clicked to view a larger preview and download the image.

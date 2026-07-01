@@ -49,6 +49,8 @@ These records are stored in `content_items` and loaded on public pages through `
 
 Gallery rows are editable too, including title, category, caption, order, URL fallback, and replacement image upload.
 
+Public gallery photos open in a full-size viewer when clicked. The viewer includes the photo title, caption, close control, and a Download button for uploaded images.
+
 ## Page Hero Images
 
 Each public page editor includes a hero background image field. Admins can upload or replace the main page header image for:

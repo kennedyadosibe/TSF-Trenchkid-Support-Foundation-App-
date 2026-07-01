@@ -13,14 +13,27 @@
     .gallery-page-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; }
     .gallery-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
     .gallery-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(26,63,163,0.16); }
+    .gallery-image-button { display: block; width: 100%; border: 0; padding: 0; background: var(--gray-light); cursor: zoom-in; }
     .gallery-card img { width: 100%; height: 240px; object-fit: cover; display: block; background: var(--gray-light); }
     .gallery-card-body { padding: 1.2rem 1.3rem; }
     .gallery-card h3 { font-family: 'Playfair Display', serif; font-size: 1.08rem; color: var(--blue-dark); margin-bottom: 0.4rem; }
     .gallery-card p { color: var(--gray); font-size: 0.88rem; line-height: 1.65; }
     .gallery-tag { display: inline-block; margin-bottom: 0.7rem; color: var(--blue); background: rgba(26,63,163,0.08); border-radius: 20px; padding: 0.2rem 0.7rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
     .empty-gallery { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; color: var(--gray); padding: 3rem 1.5rem; }
+    .image-modal { position: fixed; inset: 0; z-index: 3000; background: rgba(5, 16, 44, 0.86); display: none; align-items: center; justify-content: center; padding: 1.2rem; }
+    .image-modal.open { display: flex; }
+    .image-modal-panel { width: min(1100px, 96vw); max-height: 94vh; background: var(--white); border-radius: 14px; overflow: hidden; box-shadow: 0 30px 90px rgba(0,0,0,0.38); display: grid; grid-template-rows: auto 1fr auto; }
+    .image-modal-head, .image-modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem; }
+    .image-modal-head { border-bottom: 1px solid var(--gray-light); }
+    .image-modal-head h3 { margin: 0; color: var(--blue-dark); font-family: 'Playfair Display', serif; font-size: 1.15rem; }
+    .image-modal-close { border: 0; background: #eef2f8; color: var(--blue-dark); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: 900; font-size: 1.2rem; }
+    .image-modal-body { min-height: 0; background: #071844; display: flex; align-items: center; justify-content: center; }
+    .image-modal-body img { max-width: 100%; max-height: 72vh; object-fit: contain; display: block; }
+    .image-modal-foot { border-top: 1px solid var(--gray-light); flex-wrap: wrap; }
+    .image-modal-caption { color: var(--gray); font-size: 0.9rem; line-height: 1.5; margin: 0; }
+    .download-btn { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: var(--white); border-radius: 999px; padding: 0.55rem 1rem; font-weight: 800; text-decoration: none; }
     @media(max-width:900px) { .gallery-page-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media(max-width:560px) { .gallery-page-grid { grid-template-columns: 1fr; } .gallery-card img { height: 220px; } }
+    @media(max-width:560px) { .gallery-page-grid { grid-template-columns: 1fr; } .gallery-card img { height: 220px; } .image-modal-panel { width: 100%; max-height: 96vh; } .image-modal-body img { max-height: 62vh; } }
   </style>
 </head>
 <body>
@@ -45,6 +58,22 @@
     </div>
   </section>
 
+  <div class="image-modal" id="image-modal" aria-hidden="true">
+    <div class="image-modal-panel" role="dialog" aria-modal="true" aria-labelledby="image-modal-title">
+      <div class="image-modal-head">
+        <h3 id="image-modal-title">Gallery Photo</h3>
+        <button type="button" class="image-modal-close" id="image-modal-close" aria-label="Close image preview">&times;</button>
+      </div>
+      <div class="image-modal-body">
+        <img id="image-modal-img" src="" alt="">
+      </div>
+      <div class="image-modal-foot">
+        <p class="image-modal-caption" id="image-modal-caption"></p>
+        <a class="download-btn" id="image-modal-download" href="#" download>Download</a>
+      </div>
+    </div>
+  </div>
+
   <script src="js/time.js"></script>
   <script src="js/components.js"></script>
   <script>
@@ -59,6 +88,39 @@
         '"': '&quot;',
         "'": '&#39;'
       }[char]));
+    }
+
+    function filenameFromTitle(title, src) {
+      const cleanTitle = String(title || 'tsf-gallery-photo').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const path = String(src || '').split('?')[0];
+      const extMatch = path.match(/\.(jpg|jpeg|png|webp|gif)$/i);
+      return `${cleanTitle || 'tsf-gallery-photo'}${extMatch ? extMatch[0].toLowerCase() : '.jpg'}`;
+    }
+
+    function openImageModal(item) {
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('image-modal-img');
+      const title = document.getElementById('image-modal-title');
+      const caption = document.getElementById('image-modal-caption');
+      const download = document.getElementById('image-modal-download');
+      img.src = item.image_url;
+      img.alt = item.title || 'Gallery photo';
+      title.textContent = item.title || 'Gallery Photo';
+      caption.textContent = item.caption || item.category || '';
+      download.href = item.image_url;
+      download.setAttribute('download', filenameFromTitle(item.title, item.image_url));
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('image-modal-img');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      img.src = '';
+      document.body.style.overflow = '';
     }
 
     function renderFilters() {
@@ -80,9 +142,11 @@
       const empty = document.getElementById('gallery-empty');
       const items = activeCategory === 'All' ? galleryItems : galleryItems.filter(item => (item.category || 'General') === activeCategory);
       empty.style.display = items.length ? 'none' : 'block';
-      grid.innerHTML = items.map(item => `
+      grid.innerHTML = items.map((item, index) => `
         <article class="gallery-card fade-up visible">
-          <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">
+          <button type="button" class="gallery-image-button" data-index="${index}" aria-label="View ${escapeHtml(item.title)}">
+            <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">
+          </button>
           <div class="gallery-card-body">
             <span class="gallery-tag">${escapeHtml(item.category || 'General')}</span>
             <h3>${escapeHtml(item.title)}</h3>
@@ -90,6 +154,9 @@
           </div>
         </article>
       `).join('');
+      grid.querySelectorAll('.gallery-image-button').forEach(button => {
+        button.addEventListener('click', () => openImageModal(items[Number(button.dataset.index)]));
+      });
     }
 
     async function loadGallery() {
@@ -103,6 +170,13 @@
       renderFilters();
       renderGallery();
     }
+    document.getElementById('image-modal-close').addEventListener('click', closeImageModal);
+    document.getElementById('image-modal').addEventListener('click', event => {
+      if (event.target.id === 'image-modal') closeImageModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeImageModal();
+    });
     loadGallery();
   </script>
 </body>
