@@ -17,6 +17,7 @@ Date: 2026-06-30
 - Added a hosting readiness checklist for live deployment.
 - Changed public and admin logo displays to circular image frames.
 - Added an SMTP-aware email helper for password recovery, with a local XAMPP reset-link fallback log when SMTP is not configured.
+- Replaced public-facing emoji decorations with a local SVG icon system for consistent rendering.
 
 ## Current Branch
 

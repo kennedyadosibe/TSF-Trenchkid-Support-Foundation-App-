@@ -59,12 +59,12 @@ function renderTeam(items) {
 }
 
 function renderImpact(items) {
-  const icons = { child: '👧', check: '✅', school: '🏫', laptop: '💻' };
+  const icons = { child: 'child', check: 'check', school: 'school', laptop: 'laptop' };
   const statsGrid = document.querySelector('.impact-hero-stats');
   if (statsGrid && items.impact_stat?.length) {
     statsGrid.innerHTML = items.impact_stat.map(item => `
       <div class="impact-stat-card fade-up visible">
-        <div class="num-icon">${tsfEscape(icons[item.subtitle] || item.subtitle || '•')}</div>
+        <div class="num-icon"><span class="tsf-icon" data-icon="${tsfEscape(icons[item.subtitle] || 'star')}" aria-hidden="true"></span></div>
         <span class="big-num" data-target="${parseInt(item.meta_value || '0', 10)}">0</span>
         <div class="num-label">${tsfEscape(item.title)}</div>
       </div>
@@ -73,6 +73,7 @@ function renderImpact(items) {
       const target = parseInt(el.dataset.target || '0', 10);
       el.textContent = `${target.toLocaleString()}+`;
     });
+    hydrateTsfIcons(statsGrid);
   }
 
   const programsGrid = document.querySelector('.programs-grid');
@@ -94,7 +95,7 @@ function renderImpact(items) {
   if (testimonialsGrid && items.testimonial?.length) {
     testimonialsGrid.innerHTML = items.testimonial.map(item => `
       <div class="testimonial-card fade-up visible">
-        <div class="stars">★★★★★</div>
+        <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
         <p class="testimonial-text">${tsfEscape(item.body || '')}</p>
         <div class="testimonial-author">
           ${imageOrInitials(item, 'author-avatar')}
@@ -105,6 +106,7 @@ function renderImpact(items) {
         </div>
       </div>
     `).join('');
+    hydrateTsfIcons(testimonialsGrid);
   }
 
   const regionList = document.querySelector('.region-list');
@@ -118,7 +120,7 @@ function renderFaq(items) {
   if (faqList && items.faq?.length) {
     faqList.innerHTML = items.faq.map(item => `
       <div class="faq-item fade-up visible">
-        <div class="faq-question" onclick="toggleFaq(this)">${tsfEscape(item.title)} <span class="faq-chevron">▼</span></div>
+        <div class="faq-question" onclick="toggleFaq(this)">${tsfEscape(item.title)} <span class="faq-chevron">v</span></div>
         <div class="faq-answer"><div class="faq-answer-inner">${tsfEscape(item.body || '')}</div></div>
       </div>
     `).join('');

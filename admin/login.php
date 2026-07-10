@@ -97,6 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .back-link { display: block; text-align: center; margin-top: 1.5rem; font-size: 0.87rem; color: var(--gray); text-decoration: none; }
     .back-link:hover { color: var(--blue); }
     .security-note { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--gray); margin-top: 1.5rem; justify-content: center; }
+    .login-lock { display: inline-flex; width: 1em; height: 1em; color: var(--blue); }
+    .login-lock svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   </style>
 </head>
 <body>
@@ -130,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <a href="../index.html" class="back-link">← Back to TSF Website</a>
-    <div class="security-note">🔒 Secured &bull; Authorised personnel only</div>
+    <div class="security-note"><span class="login-lock" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Secured &bull; Authorised personnel only</div>
   </div>
   <script>
     function togglePw() {

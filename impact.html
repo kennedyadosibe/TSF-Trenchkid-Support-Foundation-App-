@@ -50,7 +50,7 @@
     .reach-text p { color: rgba(255,255,255,0.75); line-height: 1.8; margin-bottom: 1.5rem; }
     .region-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
     .region-list li { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.9rem; font-size: 0.87rem; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 0.5rem; }
-    .region-list li::before { content: '📍'; font-size: 0.9rem; }
+    .region-list li::before { content: ''; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--gold-light); flex-shrink: 0; }
     .reach-visual { background: rgba(255,255,255,0.06); border-radius: 20px; padding: 2.5rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
     .reach-visual .big-stat { font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 900; color: var(--gold-light); line-height: 1; }
     .reach-visual p { color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-size: 1rem; }
@@ -82,22 +82,22 @@
       </div>
       <div class="impact-hero-stats">
         <div class="impact-stat-card fade-up">
-          <div class="num-icon">👧</div>
+          <div class="num-icon"><span class="tsf-icon" data-icon="child" aria-hidden="true"></span></div>
           <span class="big-num" data-target="1247">0</span>
           <div class="num-label">Children Supported</div>
         </div>
         <div class="impact-stat-card fade-up">
-          <div class="num-icon">✅</div>
+          <div class="num-icon"><span class="tsf-icon" data-icon="check" aria-hidden="true"></span></div>
           <span class="big-num" data-target="48">0</span>
           <div class="num-label">Projects Completed</div>
         </div>
         <div class="impact-stat-card fade-up">
-          <div class="num-icon">🏫</div>
+          <div class="num-icon"><span class="tsf-icon" data-icon="school" aria-hidden="true"></span></div>
           <span class="big-num" data-target="23">0</span>
           <div class="num-label">Schools Partnered</div>
         </div>
         <div class="impact-stat-card fade-up">
-          <div class="num-icon">💻</div>
+          <div class="num-icon"><span class="tsf-icon" data-icon="laptop" aria-hidden="true"></span></div>
           <span class="big-num" data-target="380">0</span>
           <div class="num-label">Digital Skills Trained</div>
         </div>
@@ -115,7 +115,7 @@
             <span class="program-tag">Education</span>
             <h3>School Support Program</h3>
             <p>We sponsor school fees, uniforms, books, and stationery for children from families who cannot afford them, keeping 600+ children in school annually.</p>
-            <div class="program-stat">📚 600+ children kept in school per year</div>
+            <div class="program-stat"><span class="tsf-icon" data-icon="book" aria-hidden="true"></span> 600+ children kept in school per year</div>
           </div>
         </div>
         <div class="program-card fade-up">
@@ -124,7 +124,7 @@
             <span class="program-tag">Technology</span>
             <h3>Digital Skills Academy</h3>
             <p>Our intensive digital training covers coding, graphic design, computer literacy, and entrepreneurship — giving youth a competitive edge in the digital economy.</p>
-            <div class="program-stat">💻 380+ graduates trained</div>
+            <div class="program-stat"><span class="tsf-icon" data-icon="laptop" aria-hidden="true"></span> 380+ graduates trained</div>
           </div>
         </div>
         <div class="program-card fade-up">
@@ -133,7 +133,7 @@
             <span class="program-tag">Mentorship</span>
             <h3>Youth Mentorship Program</h3>
             <p>We pair children with mentors from industry — developers, doctors, teachers, and entrepreneurs — who guide them through education and into career readiness.</p>
-            <div class="program-stat">🤝 250+ mentor-mentee pairs active</div>
+            <div class="program-stat"><span class="tsf-icon" data-icon="handshake" aria-hidden="true"></span> 250+ mentor-mentee pairs active</div>
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@
       </div>
       <div class="testimonials-grid">
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">TSF paid my school fees when my mother could no longer afford them. Today I am in my second year at university studying computer science. TSF did not just save my education — they saved my future.</p>
           <div class="testimonial-author">
             <div class="author-initials">AK</div>
@@ -161,7 +161,7 @@
           </div>
         </div>
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">Through TSF's digital skills program, I learned how to design graphics. Now I run my own small design business and support my siblings. This foundation doesn't give charity — it gives power.</p>
           <div class="testimonial-author">
             <div class="author-initials">KM</div>
@@ -172,7 +172,7 @@
           </div>
         </div>
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">As a volunteer mentor with TSF, I have witnessed firsthand the transformation in these children's confidence and ambition. Every session reminds me why this work matters so deeply.</p>
           <div class="testimonial-author">
             <div class="author-initials">EA</div>
@@ -183,7 +183,7 @@
           </div>
         </div>
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">I donated to TSF last year and the impact report they shared showed exactly how my money was used. Transparency matters. I will continue to donate and encourage others to do the same.</p>
           <div class="testimonial-author">
             <div class="author-initials">BD</div>
@@ -194,7 +194,7 @@
           </div>
         </div>
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">My daughter's school placed TSF as a recommended partner. The health screenings and mentorship they provided gave her confidence she never had before. Remarkable work.</p>
           <div class="testimonial-author">
             <div class="author-initials">FO</div>
@@ -205,7 +205,7 @@
           </div>
         </div>
         <div class="testimonial-card fade-up">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span><span class="tsf-icon" data-icon="star" aria-hidden="true"></span></div>
           <p class="testimonial-text">TSF's community approach is unique — they don't parachute in and leave. They embed themselves, partner with local schools, and create lasting change. This is how development should work.</p>
           <div class="testimonial-author">
             <div class="author-initials">JA</div>
@@ -236,7 +236,7 @@
             <li>Eastern Region</li>
           </ul>
           <div style="margin-top:2rem">
-            <a href="donate.html" class="btn btn-gold btn-lg">💙 Support Our Expansion</a>
+            <a href="donate.html" class="btn btn-gold btn-lg"><span class="tsf-icon" data-icon="heart" aria-hidden="true"></span> Support Our Expansion</a>
           </div>
         </div>
         <div class="reach-visual fade-up">

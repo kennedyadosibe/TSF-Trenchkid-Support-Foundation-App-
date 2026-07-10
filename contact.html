@@ -78,10 +78,10 @@
             <p data-setting="contact_form_body">Fill out the form and our team will get back to you within 24 hours.</p>
 
             <div class="contact-type-tabs" id="type-tabs">
-              <button type="button" class="type-tab active" data-type="general" onclick="setType(this)">💬 General Enquiry</button>
-              <button type="button" class="type-tab" data-type="volunteer" onclick="setType(this)">🤝 Volunteer</button>
-              <button type="button" class="type-tab" data-type="partner" onclick="setType(this)">🏢 Partnership</button>
-              <button type="button" class="type-tab" data-type="donate" onclick="setType(this)">💙 Donation Query</button>
+              <button type="button" class="type-tab active" data-type="general" onclick="setType(this)"><span class="tsf-icon" data-icon="message" aria-hidden="true"></span> General Enquiry</button>
+              <button type="button" class="type-tab" data-type="volunteer" onclick="setType(this)"><span class="tsf-icon" data-icon="handshake" aria-hidden="true"></span> Volunteer</button>
+              <button type="button" class="type-tab" data-type="partner" onclick="setType(this)"><span class="tsf-icon" data-icon="building" aria-hidden="true"></span> Partnership</button>
+              <button type="button" class="type-tab" data-type="donate" onclick="setType(this)"><span class="tsf-icon" data-icon="heart" aria-hidden="true"></span> Donation Query</button>
             </div>
 
             <div id="contact-alert" class="alert"></div>
@@ -113,13 +113,13 @@
                   <span class="error-msg" id="c-message-err"></span>
                 </div>
                 <button type="submit" id="contact-btn" class="btn btn-blue btn-lg" style="width:100%;justify-content:center">
-                  ✉️ Send Message
+                  <span class="tsf-icon" data-icon="send" aria-hidden="true"></span> Send Message
                 </button>
               </form>
             </div>
 
             <div class="form-success-overlay" id="contact-success">
-              <div class="tick">✅</div>
+              <div class="tick"><span class="tsf-icon" data-icon="check" aria-hidden="true"></span></div>
               <h3>Message Sent!</h3>
               <p>Thank you for reaching out! We've received your message and will get back to you within 24 hours. TSF appreciates your interest.</p>
               <button type="button" onclick="resetContactForm()" class="btn btn-blue" style="margin-top:1.2rem">Send Another Message</button>
@@ -132,21 +132,21 @@
           <div class="contact-info-card fade-up">
             <h3 data-setting="contact_info_title">Contact Information</h3>
             <div class="contact-detail">
-              <div class="contact-detail-icon">📍</div>
+              <div class="contact-detail-icon"><span class="tsf-icon" data-icon="mapPin" aria-hidden="true"></span></div>
               <div class="contact-detail-text">
                 <label>Address</label>
                 <p data-setting="contact_address">Bolga, Upper East Region, Ghana</p>
               </div>
             </div>
             <div class="contact-detail">
-              <div class="contact-detail-icon">📞</div>
+              <div class="contact-detail-icon"><span class="tsf-icon" data-icon="phone" aria-hidden="true"></span></div>
               <div class="contact-detail-text">
                 <label>Phone</label>
                 <p><a href="tel:+233000000000" data-setting="contact_phone">+233 XX XXX XXXX</a></p>
               </div>
             </div>
             <div class="contact-detail">
-              <div class="contact-detail-icon">✉️</div>
+              <div class="contact-detail-icon"><span class="tsf-icon" data-icon="mail" aria-hidden="true"></span></div>
               <div class="contact-detail-text">
                 <label>Email</label>
                 <p><a href="mailto:info@tsfghana.org" data-setting="contact_email">info@tsfghana.org</a></p>
@@ -160,15 +160,15 @@
               </div>
             </div>
             <div class="social-strip">
-              <a href="contact.html" class="social-btn" title="Facebook">📘</a>
-              <a href="contact.html" class="social-btn" title="Twitter/X">🐦</a>
-              <a href="contact.html" class="social-btn" title="Instagram">📸</a>
-              <a href="contact.html" class="social-btn" title="LinkedIn">💼</a>
-              <a href="contact.html" class="social-btn" title="WhatsApp">💬</a>
+              <a href="contact.html" class="social-btn" title="Facebook"><span class="tsf-icon" data-icon="facebook" aria-hidden="true"></span></a>
+              <a href="contact.html" class="social-btn" title="Twitter/X"><span class="tsf-icon" data-icon="twitter" aria-hidden="true"></span></a>
+              <a href="contact.html" class="social-btn" title="Instagram"><span class="tsf-icon" data-icon="instagram" aria-hidden="true"></span></a>
+              <a href="contact.html" class="social-btn" title="LinkedIn"><span class="tsf-icon" data-icon="linkedin" aria-hidden="true"></span></a>
+              <a href="contact.html" class="social-btn" title="WhatsApp"><span class="tsf-icon" data-icon="message" aria-hidden="true"></span></a>
             </div>
           </div>
           <div class="volunteer-card fade-up">
-            <h4>🤝 Want to Volunteer?</h4>
+            <h4><span class="tsf-icon" data-icon="handshake" aria-hidden="true"></span> Want to Volunteer?</h4>
             <p data-setting="contact_volunteer_body">TSF welcomes mentors, educators, developers, healthcare workers, and anyone who shares our passion for empowering children. Select "Volunteer" above and tell us your skills!</p>
           </div>
         </div>
@@ -264,7 +264,7 @@
         alert.textContent = err.message || 'Unable to send message.';
         contactCsrfToken = '';
         try { await fetchContactToken(); } catch (_) {}
-        btn.disabled = false; btn.innerHTML = '✉️ Send Message';
+        btn.disabled = false; btn.innerHTML = '<span class="tsf-icon" data-icon="send" aria-hidden="true"></span> Send Message'; hydrateTsfIcons(btn);
       }
     });
 
@@ -273,7 +273,8 @@
       document.getElementById('contact-success').classList.remove('show');
       document.getElementById('contact-form').reset();
       document.getElementById('contact-btn').disabled = false;
-      document.getElementById('contact-btn').innerHTML = '✉️ Send Message';
+      document.getElementById('contact-btn').innerHTML = '<span class="tsf-icon" data-icon="send" aria-hidden="true"></span> Send Message';
+      hydrateTsfIcons(document.getElementById('contact-btn'));
     }
 
     function toggleFaq(el) {
