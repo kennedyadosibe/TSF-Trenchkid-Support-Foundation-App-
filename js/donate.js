@@ -112,8 +112,6 @@ async function updateDonorDisplay() {
     const data = await res.json();
     if (!data.success) return;
 
-    const totalEl = document.getElementById('total-funds');
-    if (totalEl) totalEl.textContent = `GHS ${Number(data.summary.total_raised || 0).toFixed(2)}`;
     const countEl = document.getElementById('donor-count');
     if (countEl) countEl.textContent = data.summary.total_donors || 0;
 
