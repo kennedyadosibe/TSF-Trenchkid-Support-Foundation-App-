@@ -28,19 +28,8 @@ For live hosting, set these in the hosting control panel or server environment i
 - `SMTP_*` values must be configured for admin password recovery emails to leave the server.
 - Do not put secret keys in `.html`, `.js`, or public GitHub repositories.
 - The site can still run locally with default database settings for XAMPP.
-- If hosting does not support environment variables, copy `BACKEND/config.local.example.php` to `BACKEND/config.local.php` on the server and put the hosting credentials there. `config.local.php` is ignored by git.
 - On local XAMPP without SMTP credentials, password reset links are saved in `logs/password-reset-links.log` for testing.
 - Uploaded files in `images/content/`, `images/gallery/`, `images/news/`, and `images/page/` must be copied to hosting if they should appear live.
-
-## InfinityFree Test Hosting
-
-1. Create a free hosting account/domain in InfinityFree.
-2. Create a MySQL database from the InfinityFree control panel and note the host, database name, username, and password.
-3. Open phpMyAdmin for that database and import `database/tsf.sql`.
-4. Upload the project files into the domain `htdocs` folder.
-5. On the server, copy `BACKEND/config.local.example.php` to `BACKEND/config.local.php`.
-6. Edit `BACKEND/config.local.php` with the InfinityFree domain URL and MySQL credentials.
-7. Visit the domain, then test `/admin/login.php`, public pages, gallery, article publishing, and password recovery.
 
 ## Before Going Live
 
