@@ -434,6 +434,17 @@ function e($value): string {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function adminImageSrc($path): string {
+    $path = trim((string)$path);
+    if ($path === '' || filter_var($path, FILTER_VALIDATE_URL)) {
+        return $path;
+    }
+    if (str_starts_with($path, '../') || str_starts_with($path, '/')) {
+        return $path;
+    }
+    return '../' . $path;
+}
+
 function methodText($method): string {
     return [
         'mobile_money' => 'Mobile Money',
@@ -706,7 +717,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
                     <input type="hidden" name="setting_keys[]" value="<?= e($key) ?>">
                     <label for="<?= e($key) ?>"><?= e($field['label']) ?></label>
                     <?php if (($field['type'] ?? 'text') === 'image'): ?>
-                      <?php if (!empty($settings[$key])): ?><img class="thumb" src="<?= filter_var($settings[$key], FILTER_VALIDATE_URL) ? e($settings[$key]) : '../' . e($settings[$key]) ?>" alt=""><?php endif; ?>
+                      <?php if (!empty($settings[$key])): ?><img class="thumb" src="<?= e(adminImageSrc($settings[$key])) ?>" alt=""><?php endif; ?>
                       <input class="form-control" type="file" name="setting_upload[<?= e($key) ?>]" accept="image/jpeg,image/png,image/webp,image/gif">
                       <input class="form-control" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e($settings[$key] ?? '') ?>" placeholder="Current image path or URL">
                     <?php elseif (($field['type'] ?? 'text') === 'textarea'): ?>
@@ -770,7 +781,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
             <div class="item-editor-card" data-content-type="<?= e($item['item_type']) ?>">
               <div class="item-editor-head">
                 <div class="item-editor-title">
-                  <?php if ($item['image_url']): ?><img class="thumb" src="<?= e($item['image_url']) ?>" alt=""><?php endif; ?>
+                  <?php if ($item['image_url']): ?><img class="thumb" src="<?= e(adminImageSrc($item['image_url'])) ?>" alt=""><?php endif; ?>
                   <div>
                     <strong><?= e($item['title']) ?></strong>
                     <span><?= e(($contentTypes[$item['item_type']] ?? $item['item_type']) . ' - ' . ($item['subtitle'] ?: 'No subtitle')) ?></span>
@@ -867,7 +878,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
                 <?php $galleryFormId = 'gallery-item-' . (int)$item['id']; ?>
                 <tr>
                   <td>
-                    <img class="thumb" src="<?= e($item['image_url']) ?>" alt="">
+                    <img class="thumb" src="<?= e(adminImageSrc($item['image_url'])) ?>" alt="">
                     <input form="<?= e($galleryFormId) ?>" class="form-control table-input" type="file" name="gallery_image" accept="image/jpeg,image/png,image/webp,image/gif">
                     <input form="<?= e($galleryFormId) ?>" class="form-control table-input" name="image_url" value="<?= e($item['image_url']) ?>">
                   </td>
@@ -954,7 +965,7 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
               <?php if (!$recentNews): ?><tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem">No articles created yet.</td></tr><?php endif; ?>
               <?php foreach ($recentNews as $n): ?>
                 <tr>
-                  <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= filter_var($n['cover_image'], FILTER_VALIDATE_URL) ? e($n['cover_image']) : '../' . e($n['cover_image']) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
+                  <td><?php if ($n['cover_image']): ?><img class="thumb" src="<?= e(adminImageSrc($n['cover_image'])) ?>" alt=""><?php else: ?><span class="method-badge">No cover</span><?php endif; ?></td>
                   <td><strong><?php if ($n['is_published']): ?><a href="../article.php?slug=<?= e($n['slug']) ?>" target="_blank" rel="noopener" style="color:var(--blue-dark)"><?= e($n['title']) ?></a><?php else: ?><?= e($n['title']) ?><?php endif; ?></strong></td>
                   <td><?= e($n['category']) ?></td>
                   <td><?= e($n['author_name']) ?></td>
