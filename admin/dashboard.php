@@ -470,7 +470,7 @@ function pageDescription(string $groupName): string {
         'Home Page' => 'Edit the homepage hero, intro, values, and call-to-action copy.',
         'About Page' => 'Edit the About page story, journey intro, and call-to-action.',
         'Impact Page' => 'Edit Impact page headings and reach text. Impact cards are managed below.',
-        'Team Page' => 'Edit Team page headings and call-to-action. Team members are managed below.',
+        'Team Page' => 'Edit Team page headings, group photo, and call-to-action. Team members are managed below.',
         'News Page' => 'Edit News page headings and sidebar text. Articles are managed below.',
         'Donate Page' => 'Edit the Donate page copy, form intro, security note, and thank-you message.',
         'Contact Page' => 'Edit contact copy, address, phone, email, office hours, and volunteer text.',

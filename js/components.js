@@ -204,6 +204,12 @@ async function applySiteSettings() {
         el.style.backgroundSize = 'cover';
         el.style.backgroundPosition = 'center';
       });
+      document.querySelectorAll(`[data-setting-src="${key}"]`).forEach(el => {
+        if (!value) return;
+        el.src = value;
+        el.hidden = false;
+        el.closest('[data-setting-image-frame]')?.classList.add('has-image');
+      });
     });
     applyContactFallbackSettings(data.settings);
   } catch (_) {
