@@ -55,7 +55,7 @@ function getContentDefinitions(): array {
             'team_group_image' => ['label' => 'Large Team Group Photo 1', 'type' => 'image', 'default' => 'images/page/team-group-generated.jpg'],
             'team_group_image_2' => ['label' => 'Large Team Group Photo 2', 'type' => 'image', 'default' => 'images/page/team-group-generated-2.jpg'],
             'team_group_title' => ['label' => 'Group Photo Title', 'type' => 'text', 'default' => 'Together for Every Child'],
-            'team_group_body' => ['label' => 'Group Photo Brief', 'type' => 'textarea', 'default' => 'Upload a full team photo here when TSF has a group picture ready. This image appears before the leadership briefing on the public Team page.'],
+            'team_group_body' => ['label' => 'Group Photo Brief', 'type' => 'textarea', 'default' => 'Meet the young leaders, volunteers, and builders working together to support children, strengthen communities, and grow the TSF mission across Ghana.'],
             'team_leadership_title' => ['label' => 'Leadership Title', 'type' => 'text', 'default' => 'The People Behind TSF'],
             'team_leadership_body' => ['label' => 'Leadership Brief', 'type' => 'textarea', 'default' => 'Our team is built on passion, experience, and an unwavering belief in the potential of every child.'],
             'team_advisors_title' => ['label' => 'Advisors Title', 'type' => 'text', 'default' => 'Our Advisors'],
