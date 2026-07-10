@@ -14,6 +14,8 @@ Admins can edit the section from the dashboard under `Team Page`:
 
 Uploaded images use the existing page-image upload flow and are stored in `images/page/`.
 
+The current fallback image is a generated collage saved at `images/page/team-group-generated.jpg`, built from provided TSF team photos. Admins can replace it from the dashboard at any time.
+
 ## Public Rendering
 
 The Team page uses `data-setting-src="team_group_image"` so the shared settings loader can place the uploaded image into a normal `<img>` element. If no image has been uploaded yet, the page shows a styled upload-ready placeholder instead of a broken image.

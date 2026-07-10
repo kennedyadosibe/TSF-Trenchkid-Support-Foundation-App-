@@ -10,7 +10,7 @@ Date: 2026-06-30
 - Added a Page Items Manager for Team members, Advisors, Impact stats, Programs, Testimonials, Regions, and FAQs.
 - Added public content item endpoint and dynamic rendering script for Team, Impact, and Contact pages.
 - Added content image upload storage under `images/content/`.
-- Added an admin-editable large Team group photo section before the public Team leadership briefing.
+- Added an admin-editable large Team group photo section before the public Team leadership briefing, with a generated temporary collage fallback.
 
 ## Next Useful Work
 
