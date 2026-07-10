@@ -38,7 +38,7 @@ function validateDonationInput(array $input, bool $requirePhone = false): array 
     if (!in_array($data['payment_method'], ['mobile_money', 'card'], true)) $errors[] = 'Invalid payment method.';
     if (!in_array($data['gender'], ['Male', 'Female', 'Prefer not to say', ''], true)) $errors[] = 'Invalid gender value.';
 
-    if ($data['payment_method'] === 'mobile_money' && !in_array($data['mobile_network'], ['mtn', 'telecel', 'airteltigo'], true)) {
+    if ($data['payment_method'] === 'mobile_money' && $data['mobile_network'] !== '' && !in_array($data['mobile_network'], ['mtn', 'telecel', 'airteltigo'], true)) {
         $errors[] = 'Please select MTN, Telecel, or AirtelTigo.';
     }
     if ($data['payment_method'] === 'card') {
@@ -110,14 +110,17 @@ function getDonationCallbackUrl(): string {
 function donationFromPaystackMetadata(array $tx): array {
     $metadata = is_array($tx['metadata'] ?? null) ? $tx['metadata'] : [];
     $amount = ((float)($tx['amount'] ?? 0)) / 100;
+    $channel = $tx['channel'] ?? '';
+    $paymentMethod = $channel === 'mobile_money' ? 'mobile_money' : 'card';
+    $customer = is_array($tx['customer'] ?? null) ? $tx['customer'] : [];
     return [
         'first_name' => $metadata['first_name'] ?? '',
         'last_name' => $metadata['last_name'] ?? '',
         'email' => $metadata['email'] ?? '',
-        'phone' => $metadata['phone'] ?? '',
+        'phone' => $metadata['phone'] ?? ($customer['phone'] ?? ''),
         'gender' => $metadata['gender'] ?? '',
         'amount' => $amount,
-        'payment_method' => $metadata['payment_method'] ?? 'card',
+        'payment_method' => $paymentMethod,
         'mobile_network' => $metadata['mobile_network'] ?? '',
     ];
 }

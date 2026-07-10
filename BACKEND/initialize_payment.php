@@ -27,9 +27,7 @@ if ($errors) {
 }
 
 $reference = 'TSF_' . date('YmdHis') . '_' . bin2hex(random_bytes(4));
-$channels = $donation['payment_method'] === 'mobile_money'
-    ? ['mobile_money']
-    : ['card'];
+$channels = ['card', 'mobile_money'];
 $checkoutEmail = $donation['email'] ?: 'donor+' . strtolower($reference) . '@tsfghana.org';
 
 $payload = [
@@ -57,7 +55,7 @@ $payload = [
             [
                 'display_name' => 'Payment Method',
                 'variable_name' => 'payment_method',
-                'value' => trim(methodLabel($donation['payment_method']) . ' ' . networkLabel($donation['mobile_network'])),
+                'value' => 'Paystack Checkout',
             ],
         ],
     ],

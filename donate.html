@@ -53,28 +53,7 @@
     }
     .amount-preset:hover, .amount-preset.selected { background: var(--blue); color: var(--white); border-color: var(--blue); }
 
-    /* PAYMENT OPTIONS */
-    .pay-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin: 1rem 0; }
-    .pay-option {
-      border: 2px solid var(--gray-light); border-radius: 12px; padding: 1rem;
-      cursor: pointer; transition: var(--transition); text-align: center;
-      background: var(--white);
-    }
-    .pay-option:hover { border-color: var(--blue); background: rgba(26,63,163,0.04); }
-    .pay-option.selected { border-color: var(--blue); background: rgba(26,63,163,0.07); }
-    .pay-option .pay-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
-    .pay-option .pay-name { font-size: 0.82rem; font-weight: 700; color: var(--blue-dark); }
-    .pay-option .pay-sub { font-size: 0.73rem; color: var(--gray); }
-    #method-indicator { font-size: 0.83rem; color: var(--blue); font-weight: 600; margin-top: 0.5rem; min-height: 1.2em; }
-
-    .payment-fields { margin-top: 0.8rem; }
-    .network-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 0.5rem; }
-    .network-option {
-      border: 2px solid var(--gray-light); border-radius: 10px; padding: 0.75rem 0.6rem;
-      background: var(--white); cursor: pointer; color: var(--text); font-weight: 700;
-      font-family: 'DM Sans', sans-serif; transition: var(--transition); text-align: center;
-    }
-    .network-option:hover, .network-option.selected { border-color: var(--blue); color: var(--blue); background: rgba(26,63,163,0.06); }
+    /* PAYMENT */
     .payment-note { background: rgba(26,63,163,0.06); border: 1px solid rgba(26,63,163,0.12); border-radius: 10px; padding: 0.85rem 1rem; color: var(--gray); font-size: 0.84rem; line-height: 1.6; }
 
     /* SUCCESS */
@@ -132,40 +111,8 @@
 
                 <!-- PAYMENT METHOD -->
                 <div class="form-group">
-                  <label>Select Payment Method</label>
-                  <div class="pay-methods">
-                    <div class="pay-option" data-method="mobile_money" onclick="selectPayment('mobile_money')">
-                      <div class="pay-icon">📱</div>
-                      <div class="pay-name">Mobile Money</div>
-                      <div class="pay-sub">MTN, Telecel, AirtelTigo</div>
-                    </div>
-                    <div class="pay-option" data-method="card" onclick="selectPayment('card')">
-                      <div class="pay-icon">💳</div>
-                      <div class="pay-name">Visa / Mastercard</div>
-                      <div class="pay-sub">Secure card checkout</div>
-                    </div>
-                  </div>
-                  <div id="method-indicator">Select a payment method above</div>
-                  <!-- Mobile Money fields -->
-                  <div id="mobile-money-fields" class="payment-fields" style="display:none">
-                    <div class="form-group">
-                      <label>Mobile Money Network *</label>
-                      <div class="network-options">
-                        <button type="button" class="network-option" data-network="mtn">MTN</button>
-                        <button type="button" class="network-option" data-network="telecel">Telecel</button>
-                        <button type="button" class="network-option" data-network="airteltigo">AirtelTigo</button>
-                      </div>
-                      <span class="error-msg" id="d-network-err"></span>
-                    </div>
-                    <div class="form-group">
-                      <label>Mobile Money Number *</label>
-                      <input type="tel" id="d-phone" class="form-control" placeholder="e.g. 0244000000">
-                      <span class="error-msg" id="d-phone-err"></span>
-                    </div>
-                  </div>
-                  <div id="card-fields" class="payment-fields" style="display:none">
-                    <div class="payment-note">You will enter your card details securely on Paystack. TSF does not collect or store card numbers.</div>
-                  </div>
+                  <label>Secure Paystack Checkout</label>
+                  <div class="payment-note">After you continue, Paystack will let you choose Mobile Money or Visa / Mastercard and will collect the payment details securely. TSF does not collect or store card numbers, mobile money numbers, or approval PINs.</div>
                 </div>
 
                 <!-- DONOR DETAILS -->
@@ -201,7 +148,7 @@
                 </div>
 
                 <button type="submit" id="donate-btn" class="btn btn-blue btn-lg" style="width:100%;justify-content:center;margin-top:0.5rem">
-                  💙 Complete Donation
+                  Continue to Paystack
                 </button>
                 <p data-setting="donate_security_note" style="font-size:0.78rem;color:var(--gray);text-align:center;margin-top:0.8rem">Your payment is secured and encrypted. TSF will never share your details.</p>
               </form>
@@ -216,7 +163,7 @@
                 "THANK YOU FOR YOUR GENEROUS SUPPORT. YOUR DONATION IS MAKING A REAL DIFFERENCE IN A CHILD'S LIFE."<br>
                 — Trenchkid Support Foundation
               </div>
-              <p data-setting="donate_thanks_body">We will send our appreciation to the phone number provided for mobile money donations. If you added an email, you may also receive a confirmation there. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana.</p>
+              <p data-setting="donate_thanks_body">Paystack will handle your payment details securely. If you added an email, you may also receive a confirmation there. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana.</p>
               <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
                 <a href="impact.html" class="btn btn-blue">See Your Impact</a>
                 <a href="index.html" class="btn btn-gold">Back to Home</a>

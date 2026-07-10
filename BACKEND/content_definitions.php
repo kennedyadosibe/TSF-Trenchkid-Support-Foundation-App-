@@ -72,7 +72,7 @@ function getContentDefinitions(): array {
             'donate_form_title' => ['label' => 'Form Title', 'type' => 'text', 'default' => 'Your Donation Details'],
             'donate_form_body' => ['label' => 'Form Brief', 'type' => 'textarea', 'default' => 'Fill in your information below to complete your donation. All transactions are secure.'],
             'donate_security_note' => ['label' => 'Security Note', 'type' => 'textarea', 'default' => 'Your payment is secured and encrypted. TSF will never share your details.'],
-            'donate_thanks_body' => ['label' => 'Thank You Message', 'type' => 'textarea', 'default' => "We will send our appreciation to the phone number provided for mobile money donations. If you added an email, you may also receive a confirmation there. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana."],
+            'donate_thanks_body' => ['label' => 'Thank You Message', 'type' => 'textarea', 'default' => "Paystack will handle your payment details securely. If you added an email, you may also receive a confirmation there. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana."],
         ],
         'Contact Page' => [
             'contact_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],

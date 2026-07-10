@@ -49,7 +49,6 @@ const Validate = {
 
 /* ===== DONATE FORM VALIDATION ===== */
 function validateDonateForm() {
-  const paymentMethod = window.selectedPaymentMethod || '';
   const fields = {
     fname: { el: document.getElementById('d-fname'), err: document.getElementById('d-fname-err'), rules: ['required'], msgs: ['First name is required.'] },
     lname: { el: document.getElementById('d-lname'), err: document.getElementById('d-lname-err'), rules: ['required'], msgs: ['Last name is required.'] },
@@ -57,13 +56,6 @@ function validateDonateForm() {
     amount: { el: document.getElementById('d-amount'), err: document.getElementById('d-amount-err'), rules: ['required'], msgs: ['Please enter a donation amount.'] },
     gender: { el: document.getElementById('d-gender'), err: document.getElementById('d-gender-err'), rules: ['required'], msgs: ['Please select your gender.'] },
   };
-  if (paymentMethod === 'mobile_money') {
-    fields.phone = { el: document.getElementById('d-phone'), err: document.getElementById('d-phone-err'), rules: ['required','ghPhone'], msgs: ['Phone number is required.', 'Enter a valid Ghana phone number (e.g. 0244000000 or +233244000000).'] };
-  } else {
-    const phoneEl = document.getElementById('d-phone');
-    const phoneErr = document.getElementById('d-phone-err');
-    if (phoneEl && phoneErr) Validate.clearField(phoneEl, phoneErr);
-  }
 
   let valid = true;
   for (const key in fields) {
@@ -87,19 +79,6 @@ function validateDonateForm() {
   if (amtEl && parseFloat(amtEl.value) <= 0) {
     Validate.setError(amtEl, document.getElementById('d-amount-err'), 'Amount must be greater than 0.');
     valid = false;
-  }
-
-  if (paymentMethod === 'mobile_money') {
-    const networkErr = document.getElementById('d-network-err');
-    if (!window.selectedMobileNetwork) {
-      if (networkErr) {
-        networkErr.textContent = 'Please select MTN, Telecel, or AirtelTigo.';
-        networkErr.classList.add('show');
-      }
-      valid = false;
-    } else if (networkErr) {
-      networkErr.classList.remove('show');
-    }
   }
 
   return valid;

@@ -2,16 +2,19 @@
 
 ## Summary
 
-The donation flow no longer requires donors to provide an email address. This keeps the Paystack checkout realistic while reducing friction for donors who only want to use mobile money.
+The donation flow no longer requires donors to provide an email address or payment details on the TSF site. TSF collects only donor identity and amount, then sends the donor to Paystack Checkout where Paystack presents Mobile Money and card prompts securely.
 
 ## What Changed
 
 - `donate.html` now labels email as optional.
-- `js/time.js` validates email only when a donor enters one.
+- `donate.html` no longer asks for mobile money network, mobile money number, or card choice.
+- `js/time.js` validates only donor identity, optional email, gender, and amount.
 - `BACKEND/payment_helpers.php` accepts blank donor email values and stores them as `NULL`.
 - `BACKEND/initialize_payment.php` sends Paystack a generated TSF checkout email when the donor leaves email blank.
+- `BACKEND/initialize_payment.php` initializes Paystack with both `card` and `mobile_money` checkout channels.
+- `BACKEND/payment_helpers.php` records the final payment method from Paystack's verified transaction channel where available.
 - Thank-you email is only attempted when a real donor email was provided.
-- A phone appreciation message is created for verified donations with a phone number.
+- A phone appreciation message is created only when a verified transaction includes a phone number.
 
 ## SMS Setup
 
@@ -27,7 +30,7 @@ Fresh installs get the same schema from `database/tsf.sql`.
 
 ## Testing
 
-- Submit a donation with blank email and a valid Ghana mobile money number.
-- Paystack should initialize successfully.
+- Submit a donation with blank email and no phone number on the TSF form.
+- Paystack should initialize successfully and present its own checkout prompts.
 - After payment verification, `donors.email` should be `NULL` when no email was provided.
-- `sms_notifications` should contain the phone appreciation message.
+- `sms_notifications` should contain a phone appreciation message only if Paystack provides a phone number for the verified transaction.

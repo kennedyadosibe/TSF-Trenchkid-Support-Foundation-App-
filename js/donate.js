@@ -1,39 +1,6 @@
 /* ===== TSF DONATE JS ===== */
 
-let selectedMethod = '';
-let selectedNetwork = '';
 let donateCsrfToken = '';
-
-function selectPayment(method) {
-  selectedMethod = method;
-  window.selectedPaymentMethod = method;
-  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector(`.pay-option[data-method="${method}"]`)?.classList.add('selected');
-
-  const mobileMoneyFields = document.getElementById('mobile-money-fields');
-  const cardFields = document.getElementById('card-fields');
-  if (mobileMoneyFields) mobileMoneyFields.style.display = method === 'mobile_money' ? 'block' : 'none';
-  if (cardFields) cardFields.style.display = method === 'card' ? 'block' : 'none';
-
-  if (method !== 'mobile_money') {
-    selectedNetwork = '';
-    window.selectedMobileNetwork = '';
-    document.querySelectorAll('.network-option').forEach(o => o.classList.remove('selected'));
-  }
-
-  const label = { mobile_money: 'Mobile Money', card: 'Visa / Mastercard' }[method];
-  const indicator = document.getElementById('method-indicator');
-  if (indicator) indicator.textContent = `Selected: ${label}`;
-}
-
-function selectMobileNetwork(network) {
-  selectedNetwork = network;
-  window.selectedMobileNetwork = network;
-  document.querySelectorAll('.network-option').forEach(o => o.classList.remove('selected'));
-  document.querySelector(`.network-option[data-network="${network}"]`)?.classList.add('selected');
-  const err = document.getElementById('d-network-err');
-  if (err) err.classList.remove('show');
-}
 
 async function fetchDonateToken() {
   const res = await fetch('BACKEND/csrf_token.php?form=donate', { credentials: 'same-origin' });
@@ -45,16 +12,11 @@ async function fetchDonateToken() {
 
 async function submitDonation(e) {
   e.preventDefault();
-  if (!selectedMethod) {
-    showDonateAlert('error', 'Please select a payment method.');
-    return;
-  }
   if (!validateDonateForm()) return;
 
   const fname = document.getElementById('d-fname').value.trim();
   const lname = document.getElementById('d-lname').value.trim();
   const email = document.getElementById('d-email').value.trim();
-  const phone = document.getElementById('d-phone') ? document.getElementById('d-phone').value.trim() : '';
   const amount = document.getElementById('d-amount').value;
   const gender = document.getElementById('d-gender').value;
 
@@ -73,11 +35,11 @@ async function submitDonation(e) {
         first_name: fname,
         last_name: lname,
         email,
-        phone,
+        phone: '',
         amount,
         gender,
-        payment_method: selectedMethod,
-        mobile_network: selectedNetwork
+        payment_method: 'card',
+        mobile_network: ''
       })
     });
     const data = await res.json();
@@ -94,7 +56,7 @@ async function submitDonation(e) {
     donateCsrfToken = '';
     try { await fetchDonateToken(); } catch (_) {}
     btn.disabled = false;
-    btn.textContent = 'Complete Donation';
+    btn.textContent = 'Continue to Paystack';
   }
 }
 
@@ -153,7 +115,7 @@ async function verifyReturnedPayment() {
     showDonateAlert('error', err.message || 'Payment verification failed. Please contact TSF support.');
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Complete Donation';
+      btn.textContent = 'Continue to Paystack';
     }
   }
 }
@@ -174,9 +136,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  document.querySelectorAll('.network-option').forEach(btn => {
-    btn.addEventListener('click', function () {
-      selectMobileNetwork(this.dataset.network);
-    });
-  });
 });
