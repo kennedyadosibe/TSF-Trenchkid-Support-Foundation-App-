@@ -39,8 +39,13 @@
       gap: 2rem;
       align-items: stretch;
     }
+    .team-group-gallery {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
     .team-group-frame {
-      min-height: 430px;
+      min-height: 300px;
       border-radius: 18px;
       overflow: hidden;
       position: relative;
@@ -52,7 +57,7 @@
     .team-group-frame img {
       width: 100%;
       height: 100%;
-      min-height: 430px;
+      min-height: 300px;
       object-fit: cover;
       display: block;
     }
@@ -111,7 +116,7 @@
     .join-cta h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.8rem; }
     .join-cta p { color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
 
-    @media(max-width:900px) { .team-group-showcase { grid-template-columns: 1fr; } .team-group-frame, .team-group-frame img { min-height: 320px; } .advisors-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:900px) { .team-group-showcase { grid-template-columns: 1fr; } .team-group-frame, .team-group-frame img { min-height: 260px; } .advisors-grid { grid-template-columns: repeat(2, 1fr); } }
     @media(max-width:768px) { .team-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; } }
     @media(max-width:480px) { .team-grid { grid-template-columns: 1fr; } .advisors-grid { grid-template-columns: 1fr 1fr; } }
   </style>
@@ -129,12 +134,22 @@
   <section class="team-group-section">
     <div class="container">
       <div class="team-group-showcase fade-up">
-        <div class="team-group-frame has-image" data-setting-image-frame>
-          <img src="images/page/team-group-generated.jpg" data-setting-src="team_group_image" alt="TSF team group photo">
-          <div class="team-group-empty">
-            <span class="tsf-icon" data-icon="camera" aria-hidden="true"></span>
-            <strong>Team group photo</strong>
-            <span>Upload a group picture from the Team page editor in the admin dashboard.</span>
+        <div class="team-group-gallery">
+          <div class="team-group-frame has-image" data-setting-image-frame>
+            <img src="images/page/team-group-generated.jpg" data-setting-src="team_group_image" alt="TSF team group photo collage 1">
+            <div class="team-group-empty">
+              <span class="tsf-icon" data-icon="camera" aria-hidden="true"></span>
+              <strong>Team group photo</strong>
+              <span>Upload a group picture from the Team page editor in the admin dashboard.</span>
+            </div>
+          </div>
+          <div class="team-group-frame has-image" data-setting-image-frame>
+            <img src="images/page/team-group-generated-2.jpg" data-setting-src="team_group_image_2" alt="TSF team group photo collage 2">
+            <div class="team-group-empty">
+              <span class="tsf-icon" data-icon="camera" aria-hidden="true"></span>
+              <strong>Second group photo</strong>
+              <span>Upload another team picture from the Team page editor in the admin dashboard.</span>
+            </div>
           </div>
         </div>
         <div class="team-group-copy">
