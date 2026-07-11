@@ -12,6 +12,7 @@ Date: 2026-06-30
 - Added content image upload storage under `images/content/`.
 - Added an admin-editable two-photo Team group section before the public Team leadership briefing, with generated temporary collage fallbacks.
 - Fixed admin dashboard image previews so uploaded `images/...` paths resolve correctly from inside the `admin/` folder.
+- Created a professional TSF profile PDF for partner and donor submissions.
 
 ## Next Useful Work
 
