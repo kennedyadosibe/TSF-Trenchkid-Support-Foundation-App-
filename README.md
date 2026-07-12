@@ -2,6 +2,18 @@
 
 Website and admin dashboard for Trenchkid Support Foundation. The app includes public pages, donations through Paystack Checkout, article publishing, gallery management, contact messages, and an admin-editable dashboard for site content.
 
+## About Trenchkid Support Foundation
+
+Trenchkid Support Foundation (TSF) is a youth-led foundation from Bolga in Ghana's Upper East Region, created to help underprivileged children access education, digital skills, mentorship, health support, and practical community care. TSF exists to turn compassion into structured action: connecting donors, volunteers, schools, and partners with children who need real opportunities to learn, grow, and build independent futures.
+
+This website is TSF's digital home. It presents the foundation professionally, receives secure donations through Paystack, publishes updates, manages gallery evidence, and gives the TSF team an admin dashboard for keeping the site active without editing code.
+
+## Ownership And Use
+
+This project, brand, content, design, and codebase belong to Trenchkid Support Foundation and its founding team. It is shared on GitHub for TSF development, hosting, backup, and collaboration purposes only.
+
+Do not copy, rebrand, resell, redistribute, or reuse this project as another foundation, charity, business, template, or website without written permission from TSF leadership. The TSF name, story, visual identity, site copy, dashboard flow, and project structure are intended for TSF's own official use.
+
 ## Main Features
 
 - Public pages: Home, About, Team, Impact, Gallery, News, Donate, and Contact.
