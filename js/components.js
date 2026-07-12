@@ -130,8 +130,8 @@ function renderFooter() {
       <div class="footer-col">
         <h4>Our Work</h4>
         <ul>
-          <li><a href="impact.html">Children Supported</a></li>
-          <li><a href="impact.html">Projects Completed</a></li>
+          <li><a href="impact.html">Children To Support</a></li>
+          <li><a href="impact.html">Projects Planned</a></li>
           <li><a href="impact.html">Testimonials</a></li>
           <li><a href="donate.html">Where Money Goes</a></li>
           <li><a href="contact.html">Volunteer</a></li>

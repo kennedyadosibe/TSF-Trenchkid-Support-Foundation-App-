@@ -9,6 +9,12 @@ CREATE TABLE IF NOT EXISTS site_settings (
 INSERT INTO site_settings (setting_key, setting_value) VALUES
 ('site_name', 'Trenchkid Support Foundation'),
 ('site_tagline', 'Empowering Children, Building Futures'),
+('team_group_image', 'images/page/team-group-generated.jpg'),
+('team_group_image_2', 'images/page/team-group-generated-2.jpg'),
+('team_group_title', 'Together for Every Child'),
+('team_group_body', 'Meet the young leaders, volunteers, and builders working together to support children, strengthen communities, and grow the TSF mission across Ghana.'),
+('impact_numbers_title', 'TSF Targets'),
+('impact_numbers_body', 'Expected reach and program goals TSF is working toward with donors, volunteers, schools, and community partners.'),
 ('home_intro_title', 'Breaking Cycles, Building Futures'),
 ('home_intro_body', 'Trenchkid Support Foundation empowers underprivileged children with education, digital skills, healthcare support, and mentorship so they can build independent and impactful futures.'),
 ('about_brief', 'Trenchkid Support Foundation (TSF) was established by passionate young Ghanaians who believe that no child''s future should be limited by poverty. TSF creates pathways through education, digital skills, mentorship, and community support.'),

@@ -406,7 +406,13 @@ $settings = getDefaultContentSettings();
 foreach ($settingsRows as $row) {
     $settings[$row['setting_key']] = $row['setting_value'];
 }
-$summary = $pdo->query('SELECT total_donors, total_raised, last_donation_at FROM donation_summary')->fetch()
+$summary = $pdo->query(
+    'SELECT COUNT(*) AS total_donors,
+            COALESCE(SUM(amount), 0) AS total_raised,
+            MAX(created_at) AS last_donation_at
+     FROM donors
+     WHERE payment_verified = 1'
+)->fetch()
     ?: ['total_donors' => 0, 'total_raised' => 0, 'last_donation_at' => null];
 $articleCount = (int)$pdo->query('SELECT COUNT(*) FROM news WHERE is_published = 1')->fetchColumn();
 $messageCount = (int)$pdo->query('SELECT COUNT(*) FROM messages')->fetchColumn();

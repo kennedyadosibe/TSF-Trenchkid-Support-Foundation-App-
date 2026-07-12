@@ -39,9 +39,9 @@ function getContentDefinitions(): array {
         'Impact Page' => [
             'impact_hero_image' => ['label' => 'Hero Background Image', 'type' => 'image', 'default' => ''],
             'impact_hero_title' => ['label' => 'Hero Title', 'type' => 'text', 'default' => 'Our Impact'],
-            'impact_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Numbers tell part of the story. But behind every number is a child whose life has been transformed.'],
-            'impact_numbers_title' => ['label' => 'Numbers Title', 'type' => 'text', 'default' => 'TSF in Numbers'],
-            'impact_numbers_body' => ['label' => 'Numbers Brief', 'type' => 'textarea', 'default' => 'Real results, real lives changed - tracked and verified.'],
+            'impact_hero_body' => ['label' => 'Hero Text', 'type' => 'textarea', 'default' => 'Numbers tell part of the story. Behind every target is a child TSF is preparing to reach with care, opportunity, and practical support.'],
+            'impact_numbers_title' => ['label' => 'Numbers Title', 'type' => 'text', 'default' => 'TSF Targets'],
+            'impact_numbers_body' => ['label' => 'Numbers Brief', 'type' => 'textarea', 'default' => 'Expected reach and program goals TSF is working toward with donors, volunteers, schools, and community partners.'],
             'impact_programs_title' => ['label' => 'Programs Title', 'type' => 'text', 'default' => 'What We Do'],
             'impact_testimonials_title' => ['label' => 'Testimonials Title', 'type' => 'text', 'default' => 'Voices of Change'],
             'impact_testimonials_body' => ['label' => 'Testimonials Brief', 'type' => 'textarea', 'default' => 'Hear directly from the children, families, and volunteers whose lives TSF has touched.'],

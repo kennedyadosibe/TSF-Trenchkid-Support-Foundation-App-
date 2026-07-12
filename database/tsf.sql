@@ -1,11 +1,8 @@
 -- ============================================
 -- TSF DATABASE SCHEMA
--- Database: tsf
+-- Import this file inside the database selected in phpMyAdmin or your MySQL client.
 -- Created for: Trenchkid Support Foundation
 -- ============================================
-
-CREATE DATABASE IF NOT EXISTS tsf CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE tsf;
 
 -- ============================================
 -- ADMIN TABLE
@@ -22,7 +19,7 @@ CREATE TABLE IF NOT EXISTS admin (
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Default admin (password: TSF@2025! — bcrypt)
+-- Default admin (password: TSF@2025! â€” bcrypt)
 INSERT INTO admin (username, password, full_name, email)
 VALUES ('tsf_admin', '$2y$10$elj.R7hftBzDPS7IFCK0gOjP.PzMQrkgZFlfKWfZXMHswqGgL/X4e', 'TSF Administrator', 'admin@tsfghana.org')
 ON DUPLICATE KEY UPDATE username = username;
@@ -120,14 +117,78 @@ CREATE TABLE IF NOT EXISTS site_settings (
 INSERT INTO site_settings (setting_key, setting_value) VALUES
 ('site_name', 'Trenchkid Support Foundation'),
 ('site_tagline', 'Empowering Children, Building Futures'),
-('home_intro_title', 'Breaking Cycles, Building Futures'),
-('home_intro_body', 'Trenchkid Support Foundation empowers underprivileged children with education, digital skills, healthcare support, and mentorship so they can build independent and impactful futures.'),
-('about_brief', 'Trenchkid Support Foundation (TSF) was established by passionate young Ghanaians who believe that no child''s future should be limited by poverty. TSF creates pathways through education, digital skills, mentorship, and community support.'),
 ('mission_statement', 'Trenchkid Support Foundation exists to empower underprivileged children with education, digital skills, and mentorship, enabling them to build independent and impactful futures.'),
+('home_hero_image', ''),
+('home_hero_title', 'Every Child Deserves a Bright Future'),
+('home_hero_body', 'Trenchkid Support Foundation bridges the gap between poverty and opportunity - providing education, digital skills, and mentorship to underprivileged children across Ghana.'),
+('home_intro_title', 'Breaking Cycles, Building Futures'),
+('home_intro_body', 'Trenchkid Support Foundation was born out of a deep belief: that every child, regardless of where they come from, deserves access to quality education, digital skills, and the mentorship to succeed.'),
+('home_intro_body_2', 'We don''t give handouts - we give futures. Through targeted programs, community partnerships, and passionate volunteers, TSF transforms lives one child at a time.'),
+('home_pillars_title', 'What We Stand For'),
+('home_pillars_body', 'Four pillars guide every decision we make and every life we touch.'),
+('home_cta_title', 'Ready to Change a Child''s Life?'),
+('home_cta_body', 'Your donation - no matter the size - directly funds education, health care, and mentorship for Ghana''s underprivileged children. Every cedi counts.'),
+('about_hero_image', ''),
+('about_hero_title', 'About TSF'),
+('about_hero_body', 'Learn our story, our mission, and the values that drive everything we do for Ghana''s underprivileged children.'),
+('about_story_title', 'Founded on Hope & Purpose'),
+('about_brief', 'Trenchkid Support Foundation (TSF) was established by passionate young Ghanaians who believe that no child''s future should be limited by poverty. TSF creates pathways through education, digital skills, mentorship, and community support.'),
+('about_story_body_2', 'TSF was born as a direct response - a community-driven movement to ensure that no child''s future is determined by the circumstances of their birth.'),
+('about_story_body_3', 'Today, TSF empowers underprivileged children with education, digital skills, and mentorship, enabling them to build independent and impactful futures.'),
+('about_journey_title', 'How TSF Grew'),
+('about_journey_body', 'From a small idea to a movement touching hundreds of lives across Ghana.'),
+('about_cta_title', 'Be Part of the Story'),
+('about_cta_body', 'Your donation today writes the next chapter for a child in need. Together, we can ensure no talent goes wasted.'),
+('impact_hero_image', ''),
+('impact_hero_title', 'Our Impact'),
+('impact_hero_body', 'Numbers tell part of the story. Behind every target is a child TSF is preparing to reach with care, opportunity, and practical support.'),
+('impact_numbers_title', 'TSF Targets'),
+('impact_numbers_body', 'Expected reach and program goals TSF is working toward with donors, volunteers, schools, and community partners.'),
+('impact_programs_title', 'What We Do'),
+('impact_testimonials_title', 'Voices of Change'),
+('impact_testimonials_body', 'Hear directly from the children, families, and volunteers whose lives TSF has touched.'),
+('impact_reach_title', 'Spreading Across Ghana'),
+('impact_reach_body', 'What started in Bolga has grown into a nationwide movement. TSF now operates across multiple regions of Ghana, partnering with local communities, schools, and organisations.'),
+('team_hero_image', ''),
+('team_hero_title', 'Our Team'),
+('team_hero_body', 'Meet the passionate individuals who dedicate their time and talent to empowering Ghana''s children.'),
+('team_group_image', 'images/page/team-group-generated.jpg'),
+('team_group_image_2', 'images/page/team-group-generated-2.jpg'),
+('team_group_title', 'Together for Every Child'),
+('team_group_body', 'Meet the young leaders, volunteers, and builders working together to support children, strengthen communities, and grow the TSF mission across Ghana.'),
+('team_leadership_title', 'The People Behind TSF'),
+('team_leadership_body', 'Our team is built on passion, experience, and an unwavering belief in the potential of every child.'),
+('team_advisors_title', 'Our Advisors'),
+('team_advisors_body', 'Experienced professionals who guide and support TSF''s strategic direction.'),
+('team_cta_title', 'Join Our Team'),
+('team_cta_body', 'Are you passionate about empowering children and building futures? TSF is always looking for dedicated volunteers, mentors, and partners to join our movement.'),
+('news_hero_image', ''),
+('news_hero_title', 'News & Articles'),
+('news_hero_body', 'Stay updated with the latest stories, updates, and announcements from Trenchkid Support Foundation.'),
+('news_sidebar_cta', 'Every story you read represents a real child''s life. Help us write more stories like these.'),
+('donate_hero_image', ''),
+('donate_hero_title', 'Make a Donation'),
+('donate_hero_body', 'Your generosity transforms lives. Every donation goes directly to supporting underprivileged children in Ghana.'),
+('donate_form_title', 'Your Donation Details'),
+('donate_form_body', 'Fill in your information below to complete your donation. All transactions are secure.'),
+('donate_security_note', 'Your payment is secured and encrypted. TSF will never share your details.'),
+('donate_thanks_body', 'Paystack will handle your payment details securely. If you added an email, you may also receive a confirmation there. Your contribution directly funds education, healthcare, and mentorship for underprivileged children across Ghana.'),
+('contact_hero_image', ''),
+('contact_hero_title', 'Get in Touch'),
+('contact_hero_body', 'Whether you want to donate, volunteer, partner, or simply learn more - we''d love to hear from you.'),
+('contact_form_title', 'Send Us a Message'),
+('contact_form_body', 'Fill out the form and our team will get back to you within 24 hours.'),
+('contact_info_title', 'Contact Information'),
 ('contact_address', 'Bolga, Upper East Region, Ghana'),
 ('contact_phone', '+233 XX XXX XXXX'),
 ('contact_email', 'info@tsfghana.org'),
 ('office_hours', 'Mon - Fri: 8:00 AM - 5:00 PM'),
+('contact_volunteer_body', 'TSF welcomes mentors, educators, developers, healthcare workers, and anyone who shares our passion for empowering children. Select "Volunteer" above and tell us your skills!'),
+('gallery_hero_image', ''),
+('gallery_hero_title', 'Gallery'),
+('gallery_hero_body', 'Moments from TSF programs, outreach, mentorship, and community support work.'),
+('gallery_section_title', 'TSF Gallery'),
+('gallery_section_body', 'Browse snapshots from the communities, children, and volunteers behind the mission.'),
 ('facebook_url', 'contact.html'),
 ('twitter_url', 'contact.html'),
 ('instagram_url', 'contact.html'),
@@ -193,13 +254,13 @@ INSERT INTO content_items (item_type, title, subtitle, body, meta_value, image_u
 ('advisor', 'Dr. Ama Owusu', 'Child Rights Advocate', NULL, 'DO', NULL, 2),
 ('advisor', 'James Appiah', 'Tech Entrepreneur & Investor', NULL, 'JA', NULL, 3),
 ('advisor', 'Mary Kusi', 'NGO Governance Expert', NULL, 'MK', NULL, 4),
-('impact_stat', 'Children Supported', 'child', NULL, '1247', NULL, 1),
-('impact_stat', 'Projects Completed', 'check', NULL, '48', NULL, 2),
-('impact_stat', 'Schools Partnered', 'school', NULL, '23', NULL, 3),
-('impact_stat', 'Digital Skills Trained', 'laptop', NULL, '380', NULL, 4),
-('program', 'School Support Program', 'Education', 'We sponsor school fees, uniforms, books, and stationery for children from families who cannot afford them, keeping 600+ children in school annually.', '600+ children kept in school per year', 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80', 1),
-('program', 'Digital Skills Academy', 'Technology', 'Our intensive digital training covers coding, graphic design, computer literacy, and entrepreneurship - giving youth a competitive edge in the digital economy.', '380+ graduates trained', 'https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=600&q=80', 2),
-('program', 'Youth Mentorship Program', 'Mentorship', 'We pair children with mentors from industry - developers, doctors, teachers, and entrepreneurs - who guide them through education and into career readiness.', '250+ mentor-mentee pairs active', 'https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=600&q=80', 3),
+('impact_stat', 'Children To Support', 'child', NULL, '1247', NULL, 1),
+('impact_stat', 'Projects Planned', 'check', NULL, '48', NULL, 2),
+('impact_stat', 'School Partners Targeted', 'school', NULL, '23', NULL, 3),
+('impact_stat', 'Youth To Train', 'laptop', NULL, '380', NULL, 4),
+('program', 'School Support Program', 'Education', 'We sponsor school fees, uniforms, books, and stationery for children from families who cannot afford them, with a target of supporting 600+ children in school annually.', '600+ children targeted per year', 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80', 1),
+('program', 'Digital Skills Academy', 'Technology', 'Our intensive digital training covers coding, graphic design, computer literacy, and entrepreneurship - giving youth a competitive edge in the digital economy.', '380+ youth targeted for training', 'https://images.unsplash.com/photo-1504439904031-93ded9f93e4e?w=600&q=80', 2),
+('program', 'Youth Mentorship Program', 'Mentorship', 'We pair children with mentors from industry - developers, doctors, teachers, and entrepreneurs - who guide them through education and into career readiness.', '250+ mentor-mentee pairs targeted', 'https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=600&q=80', 3),
 ('testimonial', 'Akosua K.', 'TSF Scholar, Bolga', 'TSF paid my school fees when my mother could no longer afford them. Today I am in my second year at university studying computer science. TSF did not just save my education - they saved my future.', 'AK', NULL, 1),
 ('testimonial', 'Kofi M.', 'Digital Skills Graduate', 'Through TSF''s digital skills program, I learned how to design graphics. Now I run my own small design business and support my siblings. This foundation does not give charity - it gives power.', 'KM', NULL, 2),
 ('testimonial', 'Esther A.', 'Volunteer Mentor', 'As a volunteer mentor with TSF, I have witnessed firsthand the transformation in these children''s confidence and ambition. Every session reminds me why this work matters so deeply.', 'EA', NULL, 3),
@@ -249,16 +310,3 @@ CREATE TABLE IF NOT EXISTS csrf_tokens (
     INDEX idx_token (token),
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB;
-
-
--- ============================================
--- DONATION TOTALS VIEW
--- ============================================
-CREATE OR REPLACE VIEW donation_summary AS
-SELECT
-    COUNT(*) AS total_donors,
-    SUM(amount) AS total_raised,
-    MAX(created_at) AS last_donation_at,
-    AVG(amount) AS average_donation
-FROM donors
-WHERE payment_verified = 1;

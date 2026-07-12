@@ -13,6 +13,8 @@ Date: 2026-06-30
 - Added an admin-editable two-photo Team group section before the public Team leadership briefing, with generated temporary collage fallbacks.
 - Fixed admin dashboard image previews so uploaded `images/...` paths resolve correctly from inside the `admin/` folder.
 - Created a professional TSF profile PDF for partner and donor submissions.
+- Refreshed impact language across the site and PDF so public numbers read as expected targets, not already completed results.
+- Synced the database import with current dashboard-editable settings and removed the hosted-blocking `donation_summary` view dependency.
 
 ## Next Useful Work
 
