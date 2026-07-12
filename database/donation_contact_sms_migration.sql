@@ -1,5 +1,3 @@
-USE tsf;
-
 ALTER TABLE donors
     MODIFY email VARCHAR(180) DEFAULT NULL;
 

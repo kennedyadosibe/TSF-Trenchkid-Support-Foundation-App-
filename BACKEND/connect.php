@@ -39,6 +39,37 @@ function getDB(): PDO {
     return $pdo;
 }
 
+function appBasePath(): string {
+    $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $base = '';
+    foreach (['/admin/', '/BACKEND/'] as $marker) {
+        $pos = strpos($scriptName, $marker);
+        if ($pos !== false) {
+            $base = substr($scriptName, 0, $pos);
+            break;
+        }
+    }
+    if ($base === '') {
+        $base = rtrim(dirname($scriptName), '/');
+    }
+    return $base === '/' ? '' : $base;
+}
+
+function appPath(string $path): string {
+    return appBasePath() . '/' . ltrim($path, '/');
+}
+
+function appUrl(string $path): string {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host === '') {
+        return rtrim(SITE_URL, '/') . '/' . ltrim($path, '/');
+    }
+    $scheme = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? '') === '443'))
+        ? 'https'
+        : 'http';
+    return $scheme . '://' . $host . appPath($path);
+}
+
 // ---- SESSION HELPERS ----
 
 function startSecureSession(): void {
@@ -60,12 +91,12 @@ function startSecureSession(): void {
 function requireAdminAuth(): void {
     startSecureSession();
     if (empty($_SESSION['admin_id']) || empty($_SESSION['admin_logged_in'])) {
-        header('Location: /admin/login.php');
+        header('Location: ' . appPath('admin/login.php'));
         exit;
     }
     if (empty($_SESSION['ip']) || $_SESSION['ip'] !== ($_SERVER['REMOTE_ADDR'] ?? '')) {
         session_destroy();
-        header('Location: /admin/login.php');
+        header('Location: ' . appPath('admin/login.php'));
         exit;
     }
 }

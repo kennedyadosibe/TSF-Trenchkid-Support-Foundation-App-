@@ -97,14 +97,10 @@ function paystackRequest(string $method, string $path, array $payload = []): arr
 }
 
 function getDonationCallbackUrl(): string {
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    if ($host !== '') {
-        $scheme = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? '') === '443'))
-            ? 'https'
-            : 'http';
-        return $scheme . '://' . $host . '/donate.html';
+    if (PAYSTACK_CALLBACK_URL !== '') {
+        return PAYSTACK_CALLBACK_URL;
     }
-    return PAYSTACK_CALLBACK_URL;
+    return appUrl('donate.html');
 }
 
 function donationFromPaystackMetadata(array $tx): array {

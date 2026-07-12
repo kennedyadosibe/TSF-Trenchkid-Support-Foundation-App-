@@ -15,6 +15,7 @@ Date: 2026-06-30
 - Created a professional TSF profile PDF for partner and donor submissions.
 - Refreshed impact language across the site and PDF so public numbers read as expected targets, not already completed results.
 - Synced the database import with current dashboard-editable settings and removed the hosted-blocking `donation_summary` view dependency.
+- Added private `BACKEND/config.local.php` support through a committed example file, and made admin redirects/Paystack callbacks work under both hosted root domains and local subfolders.
 
 ## Next Useful Work
 

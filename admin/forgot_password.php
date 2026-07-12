@@ -11,10 +11,7 @@ $deliveryNote = '';
 $csrfToken = generateCsrfToken('forgot_password');
 
 function buildResetUrl(string $token): string {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? '127.0.0.1:8080';
-    $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/admin'), '/\\');
-    return $scheme . '://' . $host . $base . '/reset_password.php?token=' . urlencode($token);
+    return appUrl('admin/reset_password.php?token=' . urlencode($token));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

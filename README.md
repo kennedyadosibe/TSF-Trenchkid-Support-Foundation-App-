@@ -45,23 +45,37 @@ Main configuration is in:
 BACKEND/config.php
 ```
 
-For local testing, update database settings if your XAMPP setup is different:
+For local testing or hosting without environment-variable support, copy:
+
+```text
+BACKEND/config.local.example.php
+```
+
+to:
+
+```text
+BACKEND/config.local.php
+```
+
+Then put your private database, Paystack, SMTP, and SMS settings there. `BACKEND/config.local.php` is ignored by Git and should not be pushed to GitHub.
+
+For local XAMPP, the default database values are:
 
 ```php
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'tsf');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+'DB_HOST' => 'localhost',
+'DB_NAME' => 'tsf',
+'DB_USER' => 'root',
+'DB_PASS' => '',
 ```
 
 ## Paystack Testing
 
-Paystack is initialized from the backend. Put the Paystack secret key only in backend configuration or server environment variables.
+Paystack is initialized from the backend. Put the Paystack secret key only in backend configuration, `BACKEND/config.local.php`, or server environment variables.
 
 For local testing, use a test secret key that starts with `sk_test_`:
 
 ```php
-define('PAYSTACK_SECRET_KEY', getenv('PAYSTACK_SECRET_KEY') ?: 'sk_test_your_key_here');
+'PAYSTACK_SECRET_KEY' => 'sk_test_your_key_here',
 ```
 
 Do not commit real secret keys to GitHub.

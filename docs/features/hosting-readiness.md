@@ -22,9 +22,12 @@ For live hosting, set these in the hosting control panel or server environment i
 - `SMS_API_KEY`
 - `SMS_SENDER_ID`
 
+If the host does not support environment variables, copy `BACKEND/config.local.example.php` to `BACKEND/config.local.php` on the server and put the private values there. The real `config.local.php` file is ignored by Git and must not be committed.
+
 ## Notes
 
 - `PAYSTACK_SECRET_KEY` must be the live secret key only on the server.
+- `PAYSTACK_CALLBACK_URL` may be left blank for automatic same-domain callbacks, or set explicitly to the hosted `donate.html` URL.
 - `SMTP_*` values must be configured for admin password recovery emails to leave the server.
 - Do not put secret keys in `.html`, `.js`, or public GitHub repositories.
 - The site can still run locally with default database settings for XAMPP.
@@ -34,7 +37,7 @@ For live hosting, set these in the hosting control panel or server environment i
 ## Before Going Live
 
 1. Import `database/tsf.sql` into the hosted MySQL database.
-2. Set the environment variables above.
+2. Set the environment variables above, or upload a private `BACKEND/config.local.php`.
 3. Confirm PHP is enabled and PHP files are executed, not downloaded.
 4. Enable HTTPS on the domain.
 5. Test admin login, password recovery email, donation checkout, and Paystack verification on the live domain.

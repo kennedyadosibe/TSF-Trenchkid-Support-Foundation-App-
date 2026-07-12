@@ -19,6 +19,7 @@ Updated the TSF database import and hosted-site migration path so fresh GitHub/d
 - Seeded the full current admin-editable site settings, including Team group photos, page hero copy, gallery copy, contact copy, and Impact page copy.
 - Added a migration that syncs existing hosted databases with the newer target-based impact wording and team group photo settings.
 - Changed seeded impact items from completed-language labels to target-language labels.
+- Removed hard-coded `USE tsf;` statements from migration files so they can run inside the database selected by shared-hosting phpMyAdmin.
 
 ## How To Test
 
