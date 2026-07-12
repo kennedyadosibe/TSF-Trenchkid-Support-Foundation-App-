@@ -27,7 +27,7 @@ The admin dashboard now controls editable public site content through shared sit
 ## Testing
 
 1. Log in at `/admin/login.php`.
-2. On a fresh database import, use the default account `tsf_admin` with password `TSF@2025!`, then change the password and recovery email immediately.
+2. On a fresh database import, set a fresh admin password with `tools/reset_admin_password.php`, then log in and confirm the recovery email.
 3. Open `Site Settings`.
 4. Edit a field and save.
 5. Refresh the related public page.

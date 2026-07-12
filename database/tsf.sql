@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS admin (
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Default admin (password: TSF@2025! - bcrypt)
+-- Default admin seed. Set a fresh password with tools/reset_admin_password.php after import.
 INSERT INTO admin (username, password, full_name, email)
 VALUES ('tsf_admin', '$2y$10$elj.R7hftBzDPS7IFCK0gOjP.PzMQrkgZFlfKWfZXMHswqGgL/X4e', 'TSF Administrator', 'admin@tsfghana.org')
 ON DUPLICATE KEY UPDATE username = username;

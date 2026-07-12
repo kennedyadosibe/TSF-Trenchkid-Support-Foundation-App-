@@ -102,15 +102,9 @@ Admin login is available at:
 admin/login.php
 ```
 
-After importing `database/tsf.sql`, the default admin account is:
+After importing `database/tsf.sql`, set your own admin password before using the dashboard. The database seed creates the admin user, but the README does not publish the starting password for security reasons.
 
-```text
-Username: tsf_admin
-Password: TSF@2025!
-Recovery email: admin@tsfghana.org
-```
-
-Change this password and recovery email immediately after the first login, especially before putting the site online.
+Use the command-line reset tool below to generate a fresh password and, if needed, update the recovery email before the first login.
 
 ### Command-Line Password Reset
 
