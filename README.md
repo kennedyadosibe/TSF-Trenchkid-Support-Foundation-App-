@@ -112,6 +112,30 @@ Recovery email: admin@tsfghana.org
 
 Change this password and recovery email immediately after the first login, especially before putting the site online.
 
+### Command-Line Password Reset
+
+If the admin password is lost, reset it safely from the command line. The project never stores plain passwords; this command writes only a hashed password to the `admin.password` column.
+
+Generate a strong temporary password:
+
+```text
+php tools/reset_admin_password.php --username=tsf_admin --generate
+```
+
+Or read a password from standard input:
+
+```text
+echo "NewStrongPassword123!" | php tools/reset_admin_password.php --username=tsf_admin --password-stdin
+```
+
+You can also update the recovery email during the reset:
+
+```text
+php tools/reset_admin_password.php --username=tsf_admin --email=your@email.com --generate
+```
+
+The generated password is shown once in the terminal. Store it safely, sign in, and change it when needed.
+
 After login, the dashboard lets the admin edit each page from the blue sidebar. The Team page editor includes:
 
 - Large Team Group Photo 1

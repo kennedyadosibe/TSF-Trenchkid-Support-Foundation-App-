@@ -18,6 +18,7 @@ Date: 2026-06-30
 - Changed public and admin logo displays to circular image frames.
 - Added an SMTP-aware email helper for password recovery, with a local XAMPP reset-link fallback log when SMTP is not configured.
 - Replaced public-facing emoji decorations with a local SVG icon system for consistent rendering.
+- Added a CLI-only admin password reset utility that hashes generated or stdin-provided passwords before updating the database.
 
 ## Current Branch
 
