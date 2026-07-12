@@ -76,6 +76,16 @@ Admin login is available at:
 admin/login.php
 ```
 
+After importing `database/tsf.sql`, the default admin account is:
+
+```text
+Username: tsf_admin
+Password: TSF@2025!
+Recovery email: admin@tsfghana.org
+```
+
+Change this password and recovery email immediately after the first login, especially before putting the site online.
+
 After login, the dashboard lets the admin edit each page from the blue sidebar. The Team page editor includes:
 
 - Large Team Group Photo 1
