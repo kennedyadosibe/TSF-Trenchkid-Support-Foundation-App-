@@ -39,12 +39,16 @@ if (!$admin) {
 
 $message = $_SESSION['pending_mfa_notice'] ?? '';
 $error = '';
-$csrfToken = generateCsrfToken('admin_mfa');
+$csrfVerify = generateCsrfToken('admin_mfa_verify');
+$csrfResend = generateCsrfToken('admin_mfa_resend');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'admin_mfa')) {
-        $error = 'Security validation failed. Please try again.';
-    } elseif (($_POST['action'] ?? '') === 'resend') {
+    $action = $_POST['action'] ?? 'verify';
+    $csrfType = $action === 'resend' ? 'admin_mfa_resend' : 'admin_mfa_verify';
+
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '', $csrfType)) {
+        $error = 'Security validation failed. Please refresh the page and try again.';
+    } elseif ($action === 'resend') {
         $result = sendAdminMfaCode($admin, $currentIp);
         if ($result['ok']) {
             $message = $result['message'];
@@ -68,7 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $error = $result['message'];
     }
-    $csrfToken = generateCsrfToken('admin_mfa');
+    $csrfVerify = generateCsrfToken('admin_mfa_verify');
+    $csrfResend = generateCsrfToken('admin_mfa_resend');
 }
 ?>
 <!DOCTYPE html>
@@ -112,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="POST" action="" novalidate>
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfVerify, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="action" value="verify">
       <div class="form-group">
         <label for="otp_code">Verification Code</label>
@@ -121,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button type="submit" class="login-btn">Verify & Open Dashboard</button>
     </form>
 
-    <form method="POST" action="">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+    <form method="POST" action="" novalidate>
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfResend, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="action" value="resend">
       <button type="submit" class="resend-btn">Send a New Code</button>
     </form>
