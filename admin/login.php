@@ -21,7 +21,17 @@ if (isset($_GET['logout'])) {
 }
 
 if (isset($_GET['restart'])) {
-    unset($_SESSION['pending_mfa_admin_id'], $_SESSION['pending_mfa_admin_name'], $_SESSION['pending_mfa_ip'], $_SESSION['pending_mfa_notice']);
+    unset(
+        $_SESSION['admin_id'],
+        $_SESSION['admin_name'],
+        $_SESSION['admin_logged_in'],
+        $_SESSION['ip'],
+        $_SESSION['pending_mfa_admin_id'],
+        $_SESSION['pending_mfa_admin_name'],
+        $_SESSION['pending_mfa_ip'],
+        $_SESSION['pending_mfa_notice'],
+        $_SESSION['csrf_tokens']
+    );
 }
 
 // Already logged in
