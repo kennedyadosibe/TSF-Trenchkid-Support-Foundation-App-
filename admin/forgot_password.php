@@ -7,7 +7,7 @@ startSecureSession();
 
 $message = '';
 $error = '';
-$deliveryNote = '';
+$infoNote = '';
 $csrfToken = generateCsrfToken('forgot_password');
 
 function buildResetUrl(string $token): string {
@@ -16,7 +16,7 @@ function buildResetUrl(string $token): string {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '', 'forgot_password')) {
-        $error = 'Security validation failed. Please try again.';
+        $error = 'Security validation failed. Please refresh the page and try again.';
     } else {
         $email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
         if (!$email) {
@@ -39,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $recentStmt->execute([$admin['id']]);
 
                 $hasRecentReset = (bool)$recentStmt->fetch();
-                $needsLocalFallback = isLocalRequest() && SMTP_PASS === '';
+                $smtpConfigured = preg_replace('/\s+/', '', SMTP_PASS) !== '';
 
-                if (!$hasRecentReset || $needsLocalFallback) {
+                if (!$hasRecentReset) {
                     $token = bin2hex(random_bytes(32));
                     $tokenHash = hash('sha256', $token);
                     $expiresAt = date('Y-m-d H:i:s', time() + 1800);
@@ -57,20 +57,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         . "Use this link to reset your TSF admin password. It expires in 30 minutes:\n"
                         . $resetUrl . "\n\nIf you did not request this, ignore this email. Your password will not change unless this link is opened and a new password is saved.";
                     $sent = sendAppEmail($admin['email'], $subject, $body);
-                    if ($needsLocalFallback) {
+                    if ($sent) {
+                        $infoNote = 'Check your inbox and spam folder for the reset link. It expires in 30 minutes.';
+                    } elseif (isLocalRequest()) {
                         logLocalPasswordResetLink($admin['email'], $resetUrl);
+                        $infoNote = $smtpConfigured
+                            ? 'Email delivery failed locally, so a testing reset link was saved to logs/password-reset-links.log. Check logs/app.log for the mail error.'
+                            : 'SMTP is not configured locally, so a testing reset link was saved to logs/password-reset-links.log.';
                     }
-                    if (!$sent) {
-                        if (isLocalRequest()) {
-                            $deliveryNote = 'Local email delivery is not configured. For XAMPP testing, check logs/password-reset-links.log for the reset link, or set SMTP_* environment variables to send real email.';
-                        }
-                    }
+                } else {
+                    $infoNote = 'A reset link was requested recently. Check your inbox and spam folder, or wait a few minutes before requesting another one.';
                 }
             }
 
             $message = 'If that email matches the admin account, a reset link has been sent.';
-            if (!$deliveryNote && isLocalRequest()) {
-                $deliveryNote = 'If no email arrives while testing locally, configure SMTP_* environment variables or check logs/app.log for mail delivery errors.';
+            if (!$infoNote && isLocalRequest()) {
+                $infoNote = 'For security, this page shows the same confirmation even if the address is not registered.';
             }
         }
     }
@@ -95,6 +97,7 @@ function e($value): string {
     .reset-card img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--white); display: block; margin: 0 auto 1rem; }
     .reset-card h1 { font-family: 'Playfair Display', serif; color: var(--blue-dark); font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem; }
     .reset-card p { color: var(--gray); text-align: center; line-height: 1.6; font-size: 0.9rem; margin-bottom: 1.4rem; }
+    .alert-info { background: rgba(49,130,206,0.1); color: #164e83; border: 1px solid rgba(49,130,206,0.28); }
     .back-link { display: block; text-align: center; margin-top: 1.2rem; color: var(--gray); text-decoration: none; }
   </style>
 </head>
@@ -104,7 +107,7 @@ function e($value): string {
     <h1>Password Recovery</h1>
     <p>Enter the admin recovery email. A secure reset link will be sent if the address is registered.</p>
     <?php if ($message): ?><div class="alert alert-success show"><?= e($message) ?></div><?php endif; ?>
-    <?php if ($deliveryNote): ?><div class="alert alert-error show"><?= e($deliveryNote) ?></div><?php endif; ?>
+    <?php if ($infoNote): ?><div class="alert alert-info show"><?= e($infoNote) ?></div><?php endif; ?>
     <?php if ($error): ?><div class="alert alert-error show"><?= e($error) ?></div><?php endif; ?>
     <form method="POST">
       <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">

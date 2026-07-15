@@ -37,9 +37,9 @@ The admin dashboard now controls editable public site content through shared sit
 
 Gallery photos and news articles are managed separately from the page copy. Gallery items can be added with direct image uploads, with URL entry kept only as a fallback.
 
-Password recovery never displays the reset link on the website. When the recovery email matches an admin account, the system creates a one-time token, stores only its hash, emails the reset link to the registered address, and shows the same generic message either way. Reset requests are throttled for five minutes per admin account, except local XAMPP testing can create a fresh fallback link when SMTP is not configured.
+Password recovery never displays the reset link on the website. When the recovery email matches an admin account, the system creates a one-time token, stores only its hash, emails the reset link to the registered address, and shows the same generic message either way. Reset requests are throttled for five minutes per admin account. Local XAMPP testing writes a fallback link to `logs/password-reset-links.log` only when email delivery is not available.
 
-On hosting, set the `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `FROM_EMAIL` environment variables so recovery links are sent by real email. On local XAMPP without SMTP credentials, failed recovery emails are written to `logs/password-reset-links.log` for testing.
+On hosting, set the `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `FROM_EMAIL` environment variables so recovery links are sent by real email. After a successful password reset, stale MFA login tokens are cleared for the admin account.
 
 ## Gallery Uploads
 

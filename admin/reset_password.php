@@ -42,6 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$hash, $resetRow['admin_id']]);
             $pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')
                 ->execute([$resetRow['id']]);
+            try {
+                $pdo->prepare('DELETE FROM admin_mfa_tokens WHERE admin_id = ?')
+                    ->execute([$resetRow['admin_id']]);
+            } catch (Throwable $ignored) {
+                // Older databases may not have MFA enabled yet.
+            }
             $message = 'Password updated. You can sign in now.';
             $resetRow = null;
         }
