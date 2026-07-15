@@ -39,7 +39,8 @@ function smtpCommand($socket, string $command, array $codes, string $step): bool
 }
 
 function sendSmtpEmail(string $to, string $subject, string $body, array $headers = []): bool {
-    if (SMTP_HOST === '' || SMTP_USER === '' || SMTP_PASS === '') {
+    $smtpPass = preg_replace('/\s+/', '', SMTP_PASS);
+    if (SMTP_HOST === '' || SMTP_USER === '' || $smtpPass === '') {
         return false;
     }
 
@@ -76,7 +77,7 @@ function sendSmtpEmail(string $to, string $subject, string $body, array $headers
     $ok = $ok
         && smtpCommand($socket, 'AUTH LOGIN', [334], 'auth login')
         && smtpCommand($socket, base64_encode(SMTP_USER), [334], 'auth username')
-        && smtpCommand($socket, base64_encode(SMTP_PASS), [235], 'auth password')
+        && smtpCommand($socket, base64_encode($smtpPass), [235], 'auth password')
         && smtpCommand($socket, 'MAIL FROM:<' . $from . '>', [250], 'mail from')
         && smtpCommand($socket, 'RCPT TO:<' . $to . '>', [250, 251], 'rcpt to')
         && smtpCommand($socket, 'DATA', [354], 'data');
