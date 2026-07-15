@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS admin (
     password     VARCHAR(255) NOT NULL COMMENT 'bcrypt hashed',
     full_name    VARCHAR(150) DEFAULT NULL,
     email        VARCHAR(180) NOT NULL UNIQUE,
+    phone        VARCHAR(20) DEFAULT NULL,
+    mfa_enabled  TINYINT(1) DEFAULT 1,
     last_login   DATETIME DEFAULT NULL,
     login_attempts TINYINT UNSIGNED DEFAULT 0,
     locked_until DATETIME DEFAULT NULL,
@@ -23,6 +25,25 @@ CREATE TABLE IF NOT EXISTS admin (
 INSERT INTO admin (username, password, full_name, email)
 VALUES ('tsf_admin', '$2y$10$elj.R7hftBzDPS7IFCK0gOjP.PzMQrkgZFlfKWfZXMHswqGgL/X4e', 'TSF Administrator', 'admin@tsfghana.org')
 ON DUPLICATE KEY UPDATE username = username;
+
+
+-- ============================================
+-- ADMIN MFA TOKENS
+-- ============================================
+CREATE TABLE IF NOT EXISTS admin_mfa_tokens (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT UNSIGNED NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    delivery_target VARCHAR(180) NOT NULL,
+    delivery_method ENUM('email','sms') NOT NULL DEFAULT 'email',
+    attempts TINYINT UNSIGNED DEFAULT 0,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES admin(id) ON DELETE CASCADE,
+    INDEX idx_admin_active (admin_id, used_at, expires_at),
+    INDEX idx_token_hash (token_hash)
+) ENGINE=InnoDB;
 
 
 -- ============================================

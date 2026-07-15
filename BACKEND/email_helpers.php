@@ -114,6 +114,44 @@ function sendAppEmail(string $to, string $subject, string $body, array $headers 
     return $sent;
 }
 
+function appSmsRequest(string $phone, string $message): array {
+    if (!defined('SMS_API_URL') || SMS_API_URL === '' || !defined('SMS_API_KEY') || SMS_API_KEY === '') {
+        return ['status' => 'skipped', 'message' => 'SMS provider is not configured.'];
+    }
+
+    $payload = json_encode([
+        'to' => $phone,
+        'from' => defined('SMS_SENDER_ID') && SMS_SENDER_ID !== '' ? SMS_SENDER_ID : 'TSF',
+        'message' => $message,
+    ]);
+
+    $ch = curl_init(SMS_API_URL);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . SMS_API_KEY,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_TIMEOUT => 20,
+    ]);
+
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response !== false && $httpCode >= 200 && $httpCode < 300) {
+        return ['status' => 'sent', 'message' => $response];
+    }
+
+    return [
+        'status' => 'failed',
+        'message' => $error ?: ($response ?: 'SMS provider returned HTTP ' . $httpCode),
+    ];
+}
+
 function isLocalRequest(): bool {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $addr = $_SERVER['REMOTE_ADDR'] ?? '';

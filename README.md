@@ -18,6 +18,7 @@ Do not copy, rebrand, resell, redistribute, or reuse this project as another fou
 
 - Public pages: Home, About, Team, Impact, Gallery, News, Donate, and Contact.
 - Admin dashboard for editing page text, contact details, hero images, team content, gallery photos, articles, and site settings.
+- Admin MFA login using a password plus a short-lived email/SMS verification code.
 - Team group photo section with two editable banner images.
 - Paystack Checkout donation flow for card and Ghana mobile money payments.
 - Donation verification, donor records, thank-you email support, and SMS notification logging.
@@ -106,6 +107,8 @@ After importing `database/tsf.sql`, set your own admin password before using the
 
 Use the command-line reset tool below to generate a fresh password and, if needed, update the recovery email before the first login.
 
+Admin login uses MFA when enabled. After the password is accepted, the dashboard sends a 6-digit verification code to the configured recovery email, and also to the admin phone number when SMS settings are available. The code expires quickly and is stored only as a hash in the database.
+
 ### Command-Line Password Reset
 
 If the admin password is lost, reset it safely from the command line. The project never stores plain passwords; this command writes only a hashed password to the `admin.password` column.
@@ -128,7 +131,39 @@ You can also update the recovery email during the reset:
 php tools/reset_admin_password.php --username=tsf_admin --email=your@email.com --generate
 ```
 
-The generated password is shown once in the terminal. Store it safely, sign in, and change it when needed.
+The generated password is shown once in the terminal. Store it safely, sign in, and change it when needed. If MFA contact details are wrong, use `--email=your@email.com` during the reset so the next login code is sent to the correct address.
+
+### MFA Delivery Setup
+
+Email OTP delivery needs working SMTP settings in `BACKEND/config.local.php` or hosting environment variables:
+
+```php
+'SMTP_HOST' => 'smtp.gmail.com',
+'SMTP_PORT' => 587,
+'SMTP_USER' => 'your@email.com',
+'SMTP_PASS' => 'your_app_password',
+'FROM_EMAIL' => 'your@email.com',
+```
+
+SMS OTP delivery is optional and needs an SMS provider endpoint:
+
+```php
+'SMS_API_URL' => 'https://your-sms-provider-endpoint',
+'SMS_API_KEY' => 'your_sms_api_key',
+'SMS_SENDER_ID' => 'TSF',
+```
+
+For existing hosted databases, import:
+
+```text
+database/admin_mfa_migration.sql
+```
+
+On local XAMPP, if SMTP is not configured, the MFA code is written to:
+
+```text
+logs/admin-mfa-codes.log
+```
 
 After login, the dashboard lets the admin edit each page from the blue sidebar. The Team page editor includes:
 
@@ -165,6 +200,7 @@ The repository includes `.gitkeep` files so those folders exist after cloning.
 - Never commit Paystack live keys, SMTP passwords, database passwords, or SMS API keys.
 - Use environment variables on hosting where possible.
 - Keep `DEBUG_MODE` disabled in production.
+- Keep admin MFA enabled on hosted sites and make sure the recovery email can receive OTP messages.
 
 ## Project Documentation
 

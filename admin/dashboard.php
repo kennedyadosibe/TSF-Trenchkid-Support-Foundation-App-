@@ -2,6 +2,7 @@
 define('TSF_LOADED', true);
 require_once __DIR__ . '/../BACKEND/connect.php';
 require_once __DIR__ . '/../BACKEND/content_definitions.php';
+require_once __DIR__ . '/../BACKEND/mfa_helpers.php';
 requireAdminAuth();
 
 $pdo = getDB();
@@ -361,13 +362,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     } else {
         $email = filter_var(trim($_POST['admin_email'] ?? ''), FILTER_VALIDATE_EMAIL);
         $name = cleanText($_POST['admin_name'] ?? '');
+        $phone = normalizeAdminPhone($_POST['admin_phone'] ?? '');
+        $mfaEnabled = isset($_POST['mfa_enabled']) ? 1 : 0;
         if (!$email) {
             $accountError = 'Enter a valid recovery email.';
+        } elseif ($phone !== '' && !preg_match('/^\+?\d{10,15}$/', $phone)) {
+            $accountError = 'Enter a valid admin phone number or leave it blank.';
         } else {
-            $stmt = $pdo->prepare('UPDATE admin SET email = ?, full_name = ? WHERE id = ?');
-            $stmt->execute([$email, $name ?: 'TSF Administrator', $_SESSION['admin_id']]);
+            $stmt = $pdo->prepare('UPDATE admin SET email = ?, full_name = ?, phone = ?, mfa_enabled = ? WHERE id = ?');
+            $stmt->execute([$email, $name ?: 'TSF Administrator', $phone ?: null, $mfaEnabled, $_SESSION['admin_id']]);
             $_SESSION['admin_name'] = $name ?: 'TSF Administrator';
-            $accountMessage = 'Admin account updated.';
+            $accountMessage = 'Admin account and login verification settings updated.';
             $activePanel = 'account';
         }
     }
@@ -432,9 +437,9 @@ $galleryItems = $pdo->query(
 $contentItems = $pdo->query(
     'SELECT id, item_type, title, subtitle, body, meta_value, image_url, display_order FROM content_items WHERE is_active = 1 ORDER BY item_type ASC, display_order ASC, created_at ASC'
 )->fetchAll();
-$adminAccountStmt = $pdo->prepare('SELECT full_name, email FROM admin WHERE id = ?');
+$adminAccountStmt = $pdo->prepare('SELECT full_name, email, phone, mfa_enabled FROM admin WHERE id = ?');
 $adminAccountStmt->execute([$_SESSION['admin_id']]);
-$adminAccount = $adminAccountStmt->fetch() ?: ['full_name' => '', 'email' => ''];
+$adminAccount = $adminAccountStmt->fetch() ?: ['full_name' => '', 'email' => '', 'phone' => '', 'mfa_enabled' => 1];
 
 function e($value): string {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
@@ -570,6 +575,8 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
     .msg-content { color: var(--gray); white-space: pre-wrap; line-height: 1.65; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 1rem; }
+    .check-row { min-height: 48px; display: flex; align-items: center; gap: 0.65rem; padding: 0.72rem 0.85rem; border: 1px solid #dfe5f2; border-radius: 10px; background: #f8faff; color: var(--blue-dark); font-weight: 800; line-height: 1.35; }
+    .check-row input { width: auto; accent-color: var(--blue); }
     .settings-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
     .settings-search { max-width: 360px; flex: 1; min-width: 220px; }
     .settings-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; }
@@ -1023,17 +1030,19 @@ function sectionIdForSettingKey(string $key, array $definitions): string {
       </section>
 
       <section class="admin-section" id="account">
-        <div class="admin-section-header"><div><h3>Admin Account & Recovery Email</h3><p>Keep the account name and recovery email current.</p></div></div>
+        <div class="admin-section-header"><div><h3>Admin Account & Login Security</h3><p>Keep the account name, recovery email, and MFA contacts current.</p></div></div>
         <div class="publish-card">
           <?php if ($accountMessage): ?><div class="alert alert-success show"><?= e($accountMessage) ?></div><?php endif; ?>
           <?php if ($accountError): ?><div class="alert alert-error show"><?= e($accountError) ?></div><?php endif; ?>
-          <p class="settings-help">Password recovery links are sent to this admin email address. Put your personal email here before relying on password recovery.</p>
+          <p class="settings-help">Password recovery links and login verification codes use these contacts. SMS codes require a configured SMS provider.</p>
           <form method="POST">
             <input type="hidden" name="action" value="update_account">
             <input type="hidden" name="csrf_token" value="<?= e($csrfAccount) ?>">
             <div class="form-grid">
               <div class="form-group"><label>Admin Name</label><input class="form-control" name="admin_name" value="<?= e($adminAccount['full_name'] ?? '') ?>"></div>
               <div class="form-group"><label>Recovery Email</label><input class="form-control" type="email" name="admin_email" value="<?= e($adminAccount['email'] ?? '') ?>"></div>
+              <div class="form-group"><label>MFA Phone Number</label><input class="form-control" type="tel" name="admin_phone" placeholder="+233XXXXXXXXX" value="<?= e($adminAccount['phone'] ?? '') ?>"></div>
+              <div class="form-group"><label>Login Verification</label><label class="check-row"><input type="checkbox" name="mfa_enabled" value="1" <?= !empty($adminAccount['mfa_enabled']) ? 'checked' : '' ?>> Require OTP after password login</label></div>
             </div>
             <button type="submit" class="btn btn-blue">Save Admin Account</button>
             <a href="forgot_password.php" class="btn btn-gold" style="margin-left:0.7rem">Test Password Recovery</a>

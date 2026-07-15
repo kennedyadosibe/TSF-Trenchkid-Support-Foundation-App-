@@ -5,11 +5,16 @@
 // ============================================
 define('TSF_LOADED', true);
 require_once __DIR__ . '/../BACKEND/connect.php';
+require_once __DIR__ . '/../BACKEND/mfa_helpers.php';
 
 startSecureSession();
 
+if (isset($_GET['restart'])) {
+    unset($_SESSION['pending_mfa_admin_id'], $_SESSION['pending_mfa_admin_name'], $_SESSION['pending_mfa_ip'], $_SESSION['pending_mfa_notice']);
+}
+
 // Already logged in
-if (!empty($_SESSION['admin_id'])) {
+if (!empty($_SESSION['admin_id']) && !empty($_SESSION['admin_logged_in'])) {
     header('Location: dashboard.php');
     exit;
 }
@@ -38,18 +43,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mins = ceil((strtotime($admin['locked_until']) - time()) / 60);
             $error = "Account locked. Try again in $mins minute(s).";
         } elseif ($admin && password_verify($password, $admin['password'])) {
-            // Success — reset attempts
-            $pdo->prepare('UPDATE admin SET login_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')
+            // Password accepted; MFA decides whether the full session opens now.
+            $pdo->prepare('UPDATE admin SET login_attempts=0, locked_until=NULL WHERE id=?')
                 ->execute([$admin['id']]);
 
             session_regenerate_id(true);
-            $_SESSION['admin_id']      = $admin['id'];
-            $_SESSION['admin_name']    = $admin['full_name'] ?? $admin['username'];
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['ip']            = $_SERVER['REMOTE_ADDR'] ?? '';
+            if (!empty($admin['mfa_enabled'])) {
+                $mfaNotice = sendAdminMfaCode($admin, $_SERVER['REMOTE_ADDR'] ?? '');
+                if (!$mfaNotice['ok']) {
+                    $error = $mfaNotice['message'];
+                } else {
+                    $_SESSION['pending_mfa_admin_id'] = (int)$admin['id'];
+                    $_SESSION['pending_mfa_admin_name'] = $admin['full_name'] ?? $admin['username'];
+                    $_SESSION['pending_mfa_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
+                    $_SESSION['pending_mfa_notice'] = $mfaNotice['message'];
 
-            header('Location: dashboard.php');
-            exit;
+                    header('Location: verify_mfa.php');
+                    exit;
+                }
+            } else {
+                $_SESSION['admin_id']      = $admin['id'];
+                $_SESSION['admin_name']    = $admin['full_name'] ?? $admin['username'];
+                $_SESSION['admin_logged_in'] = true;
+                $_SESSION['ip']            = $_SERVER['REMOTE_ADDR'] ?? '';
+
+                $pdo->prepare('UPDATE admin SET last_login=NOW() WHERE id=?')->execute([$admin['id']]);
+                header('Location: dashboard.php');
+                exit;
+            }
         } else {
             // Failed attempt
             if ($admin) {

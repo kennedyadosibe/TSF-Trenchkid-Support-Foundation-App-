@@ -130,6 +130,11 @@ try {
     }
 
     $pdo->prepare('DELETE FROM password_resets WHERE admin_id = ?')->execute([$admin['id']]);
+    try {
+        $pdo->prepare('DELETE FROM admin_mfa_tokens WHERE admin_id = ?')->execute([$admin['id']]);
+    } catch (Throwable $ignored) {
+        // Older databases may not have MFA enabled yet.
+    }
 
     echo "Admin password reset successfully.\n";
     echo "Username: $username\n";
